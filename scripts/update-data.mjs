@@ -75,7 +75,7 @@ export function parseBrand(html, brand) {
     .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
     .replace(/\s+/g, ' ');
   const title = BRANDS[brand].name;
-  const entry = new RegExp(title + '\\s*(\\d{3,4}(?:\\.\\d+)?)\\s*元\\/克\\s*\\d{3,4}(?:\\.\\d+)?\\s*元\\/克\\s*(20\\d{2}-\\d{1,2}-\\d{1,2})', 'g');
+  const entry = new RegExp(title + '\\s*(\d{3,4}(?:\\.\d+)?)\\s*元\\/克\\s*\d{3,4}(?:\\.\d+)?\\s*元\\/克\\s*(20\d{2}-\d{1,2}-\d{1,2})', 'g');
   const points = Array.from(visible.matchAll(entry), (match) => ({
     date: match[2].replace(/-(\d)(?=-|$)/g, '-0$1'),
     close: num(match[1])
@@ -96,6 +96,52 @@ export function parseXauPrice(data) {
   }
   return { ok: true, source: 'Gold API', symbol: 'XAU', currency: 'USD',
     price, updatedAt: new Date(updated).toISOString() };
+}
+
+
+const EASTMONEY_XAU = 'https://push2his.eastmoney.com/api/qt/stock/kline/get';
+
+async function fetchEastmoneyXau(interval, limit) {
+  const url = new URL(EASTMONEY_XAU);
+  for (const [key, value] of Object.entries({
+    secid: '122.XAU', fields1: 'f1,f2,f3,f4,f5,f6',
+    fields2: 'f51,f52,f53,f54,f55,f56',
+    klt: String(interval), fqt: '0', beg: '0', end: '20500101', lmt: String(limit)
+  })) url.searchParams.set(key, value);
+  return JSON.parse(await fetchText(url.toString(), {
+    headers: { referer: 'https://quote.eastmoney.com/option/122.XAU.html', accept: 'application/json' }
+  }));
+}
+
+export function parseXauHistory(payload, intraday = false) {
+  const data = payload?.data;
+  if (payload?.rc !== 0 || String(data?.code || '').toUpperCase() !== 'XAU' ||
+      !Array.isArray(data.klines)) throw new Error('Eastmoney XAU history unavailable');
+  const rows = data.klines.map((row) => {
+    if (typeof row !== 'string') return null;
+    const values = row.split(',');
+    const stamp = values[0] || '';
+    if (!/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/.test(stamp) ||
+        (intraday && stamp.length !== 16) || (!intraday && stamp.length !== 10)) return null;
+    const open = num(values[1]), close = num(values[2]);
+    const high = num(values[3]), low = num(values[4]);
+    if (!open || !close || !high || !low || high < low ||
+        open > high || open < low || close > high || close < low) return null;
+    return intraday
+      ? { date: stamp.slice(0, 10), time: stamp.slice(11), open, close, high, low }
+      : { date: stamp, open, close, high, low };
+  }).filter(Boolean).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  const deduped = rows.filter((row, i) => i === 0 ||
+    row.date !== rows[i - 1].date || row.time !== rows[i - 1].time);
+  const latest = deduped.at(-1)?.date;
+  const points = intraday ? deduped.filter((row) => row.date === latest) : deduped;
+  if (points.length < 5) throw new Error('Eastmoney XAU history has too few valid bars');
+  return {
+    ok: true, source: '东方财富 黄金/美元', symbol: 'XAU/USD',
+    interval: intraday ? '5m' : '1d',
+    quoteTime: points.at(-1).date + (intraday ? ' ' + points.at(-1).time : ''),
+    points
+  };
 }
 
 async function update(file, producer, hasSeries = true) {
@@ -119,6 +165,8 @@ async function main() {
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   const jobs = [
     ['xau-latest', async () => parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU', { headers: { accept: 'application/json' } }))), false],
+    ['xau-history', async () => parseXauHistory(await fetchEastmoneyXau(101, 500))],
+    ['xau-intraday', async () => parseXauHistory(await fetchEastmoneyXau(5, 500), true)],
     ['sge-history', async () => parseDaily(await fetchSge('/graph/Dailyhq', 'POST'))],
     ['sge-intraday', async () => {
       let data;
