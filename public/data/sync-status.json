@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "lastRunAt": "2026-11-19T14:17:03.969Z",
+  "lastFullSyncAt": "2026-11-19T14:17:03.969Z",
+  "successful": 8,
+  "total": 8,
+  "sources": {
+    "xau-latest": "2026-11-19T14:17:03.969Z",
+    "xau-history": "2026-11-19T14:17:03.969Z",
+    "xau-intraday": "2026-11-19T14:17:03.969Z",
+    "sge-history": "2026-11-19T14:17:03.969Z",
+    "sge-intraday": "2026-11-19T14:17:03.969Z",
+    "brand-chowtaifook": "2026-11-19T14:17:03.969Z",
+    "brand-laofengxiang": "2026-11-19T14:17:03.969Z",
+    "brand-zhouliufu": "2026-11-19T14:17:03.969Z"
+  }
+}
