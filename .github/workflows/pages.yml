@@ -5,8 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    # UTC: refresh once an hour at minute 13; scheduled runs may be delayed.
-    - cron: '13 * * * *'
+    # UTC: hourly refresh, with a backup check 30 minutes later.
+    # The updater skips the backup when a full sync finished recently.
+    - cron: '17 * * * *'
+    - cron: '47 * * * *'
 
 permissions:
   contents: write
@@ -33,7 +35,9 @@ jobs:
       - name: Test data parsers
         run: node --test
       - name: Refresh published gold price snapshots
-        run: npm run update-data
+        run: npm run update-data -- --if-due
+        env:
+          UPDATE_SCHEDULED: ${{ github.event_name == 'schedule' }}
       - name: Save fresh data to repository
         run: |
           git config user.name "github-actions[bot]"

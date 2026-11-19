@@ -210,8 +210,42 @@ async function update(file, producer, hasSeries = true) {
   }
 }
 
+const SYNC_STATUS_PATH = new URL('../public/data/sync-status.json', import.meta.url);
+const MIN_SCHEDULE_GAP_MS = 50 * 60 * 1000;
+
+export function isRecentFullSync(lastFullSyncAt, now = Date.now()) {
+  const previous = Date.parse(lastFullSyncAt);
+  return Number.isFinite(previous) && now >= previous && now - previous < MIN_SCHEDULE_GAP_MS;
+}
+
+export function buildSyncStatus(previous, names, outcomes, now) {
+  const sources = Object.fromEntries(names.map((name, index) => [
+    name, outcomes[index] ? now : (previous?.sources?.[name] || null)
+  ]));
+  const successful = outcomes.filter(Boolean).length;
+  return {
+    ok: true,
+    lastRunAt: now,
+    lastFullSyncAt: successful === names.length ? now : (previous?.lastFullSyncAt || null),
+    successful,
+    total: names.length,
+    sources
+  };
+}
+
+async function readSyncStatus() {
+  try { return JSON.parse(await readFile(SYNC_STATUS_PATH, 'utf8')); }
+  catch { return {}; }
+}
+
 async function main() {
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
+  const previousStatus = await readSyncStatus();
+  if (process.env.UPDATE_SCHEDULED === 'true' && process.argv.includes('--if-due') &&
+      isRecentFullSync(previousStatus.lastFullSyncAt)) {
+    console.log('Data sync: recent full update found; backup check skipped');
+    return;
+  }
   const jobs = [
     ['xau-latest', async () => parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU', { headers: { accept: 'application/json' } }))), false],
     ['xau-history', async () => {
@@ -235,6 +269,8 @@ async function main() {
     ])
   ];
   const outcomes = await Promise.all(jobs.map(([file, producer, hasSeries]) => update(file, producer, hasSeries)));
+  const status = buildSyncStatus(previousStatus, jobs.map(([file]) => file), outcomes, new Date().toISOString());
+  await writeFile(SYNC_STATUS_PATH, JSON.stringify(status, null, 2) + '\n', 'utf8');
   console.log(`Data sync: ${outcomes.filter(Boolean).length}/${outcomes.length} sources updated`);
   // Existing snapshots are intentionally retained on temporary upstream errors.
 }

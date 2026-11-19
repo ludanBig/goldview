@@ -1,6 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXauHistory, parseXausHistory, parseXausIntraday } from './update-data.mjs';
+import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXauHistory, parseXausHistory, parseXausIntraday, isRecentFullSync, buildSyncStatus } from './update-data.mjs';
+
+test('hourly sync keeps a backup window and retries old or partial syncs', () => {
+  const now = Date.parse('2026-11-19T11:47:00Z');
+  assert.equal(isRecentFullSync('2026-11-19T11:17:00Z', now), true);
+  assert.equal(isRecentFullSync('2026-11-19T10:47:00Z', now), false);
+  assert.equal(isRecentFullSync(null, now), false);
+  assert.equal(isRecentFullSync('2026-11-19T12:17:00Z', now), false);
+});
+
+test('sync status keeps previous successful source timestamps on failure', () => {
+  const previous = { lastFullSyncAt: '2026-11-19T09:17:00Z', sources: { intl: '2026-11-19T09:17:00Z' } };
+  const status = buildSyncStatus(previous, ['intl', 'china'], [false, true], '2026-11-19T10:17:00Z');
+  assert.equal(status.lastFullSyncAt, previous.lastFullSyncAt);
+  assert.equal(status.sources.intl, previous.sources.intl);
+  assert.equal(status.sources.china, '2026-11-19T10:17:00Z');
+  assert.equal(status.successful, 1);
+});
 
 test('SGE daily OHLC parsing and date sort', () => {
   const time = Array.from({ length: 5 }, (_, i) => [`2026-11-${String(5 - i).padStart(2, '0')}`, 810, 812 + i, 800, 821]);

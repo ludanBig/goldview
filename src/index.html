@@ -11,12 +11,19 @@
 <style>
 :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#172736;background:#f6f8fb;font-synthesis:none}*{box-sizing:border-box}body{margin:0;font-size:16px;-webkit-font-smoothing:antialiased}button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}a:hover{color:#bc893e}.shell{max-width:1240px;padding:0 28px;margin:auto}.topbar{height:78px;background:#fff;border-bottom:1px solid #e7ecf2}.bar-inner{height:100%;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:22px;letter-spacing:-.8px}.mark{width:37px;height:37px;border-radius:11px;background:#182f3a;color:#edca8f;display:grid;place-items:center;font-size:22px}.brand small{display:block;font-size:10px;letter-spacing:2px;color:#a0aab4;margin-top:2px}.nav{display:flex;align-items:center;gap:23px;font-size:14px;color:#6b7887}.share{border:1px solid #e0e7ef;background:#fff;border-radius:10px;padding:10px 15px;color:#506171}.share:hover{background:#f3f6f9}.intro{padding:43px 0 27px}.eyebrow{color:#ad823d;letter-spacing:1px;font-size:13px;font-weight:800}.intro h1{font-size:38px;line-height:1.25;letter-spacing:-1.5px;margin:9px 0 10px}.intro p{font-size:15px;color:#7b8897;line-height:1.8;margin:0}.markets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.market{border:1px solid #e1e8ef;box-shadow:0 3px 15px #263b4d05;background:white;text-align:left;min-height:155px;border-radius:16px;padding:23px;position:relative;transition:border-color .18s,transform .18s}.market:hover{border-color:#cdb184;transform:translateY(-1px)}.market.active{border-color:#caa369;box-shadow:0 5px 20px #b38a3920}.market.active:before{content:"";width:4px;background:#be8c42;position:absolute;left:0;top:0;bottom:0;border-radius:16px 0 0 16px}.market-title{font-size:16px;font-weight:750}.market-code{color:#9aa5b2;font-size:13px;margin-top:7px}.market-bottom{display:flex;justify-content:space-between;align-items:end;gap:8px;margin-top:27px}.market-bottom .value{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums;white-space:nowrap}.market-bottom .hint{font-size:12px;color:#8693a0;white-space:nowrap}.market-bottom .unit{font-weight:500;color:#8b98a6;font-size:12px;margin-left:3px}.panel{margin-top:17px;border-radius:18px;overflow:hidden;border:1px solid #e1e8f0;background:#fff;box-shadow:0 7px 25px #283b4e08}.panel-head{min-height:87px;border-bottom:1px solid #edf1f5;padding:21px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px}.panel-title h2{margin:0 0 6px;font-size:20px;letter-spacing:-.5px}.panel-title p{margin:0;color:#97a1ad;font-size:13px}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.seg{display:flex;background:#f3f5f8;border-radius:10px;padding:4px;gap:3px}.seg button{background:none;border:0;padding:8px 12px;color:#778493;border-radius:7px;font-size:13px}.seg button.selected{background:#fff;color:#233440;font-weight:750;box-shadow:0 1px 5px #182f3a18}.refresh{border:1px solid #e2e9f0;background:white;border-radius:9px;padding:10px 12px;color:#637282;font-size:13px}.refresh:hover{background:#f6f8fa}.chart-content{height:490px;padding:15px 22px 18px}.tv{height:100%}.chart-visual{height:100%;display:flex;flex-direction:column}.chart-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 8px;color:#8b98a7;font-size:13px}.chart-status strong{font-size:23px;color:#213340;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.stamp{margin-left:auto;color:#97a3af}.graph{flex:1;min-height:0;position:relative;margin-top:17px}.graph svg{width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom}.graph #plotHover{touch-action:pan-y pinch-zoom;cursor:crosshair}.graph #plotCross,.graph #plotDot{pointer-events:none}.hover-tip{position:absolute;pointer-events:none;z-index:2;transform:translate(-50%,-108%);border-radius:9px;background:#1e3541;color:white;box-shadow:0 10px 25px #152f3d22;padding:9px 13px;font-size:12px;line-height:1.8;white-space:nowrap}.hover-tip strong{font-size:15px}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#8895a5;font-size:14px;padding:20px}.empty strong{color:#425461;font-size:16px}.empty a{color:#ac7e37;text-decoration:underline;text-underline-offset:4px}.spin{width:28px;height:28px;border:3px solid #e8ecf1;border-top-color:#be914c;border-radius:50%;animation:spin .9s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.panel-foot{border-top:1px solid #edf1f5;padding:15px 26px;color:#929eab;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:16px}.panel-foot a{color:#a97f43;font-weight:700;white-space:nowrap}.explainer{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0 50px}.explainer article{background:#fff;border:1px solid #e7ecf2;border-radius:14px;padding:20px 22px}.explainer .glyph{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:#f9f3e9;color:#b58c4e;font-size:20px;margin-bottom:12px}.explainer h3{font-size:15px;margin:0 0 7px}.explainer p{color:#8b96a3;font-size:13px;line-height:1.8;margin:0}.muted-link{color:#a47a39;text-decoration:underline;text-underline-offset:3px}footer{border-top:1px solid #e7edf2;padding:25px 0 35px;color:#95a0ad;font-size:12px;line-height:1.6}.footer-inner{display:flex;justify-content:space-between;gap:20px}.hidden{display:none!important}.brand-selector{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}.brand-selector button{font-size:13px;background:#fff;color:#728091;border:1px solid #e3e9ef;padding:8px 12px;border-radius:9px}.brand-selector button.selected{border-color:#c6a36e;background:#fbf7ee;color:#8c682b;font-weight:700}
 @media(max-width:760px){.shell{padding:0 16px}.topbar{height:68px}.brand{font-size:19px}.nav>a{display:none}.intro{padding:31px 0 24px}.intro h1{font-size:30px}.intro p{font-size:14px}.markets{grid-template-columns:1fr;gap:9px}.market{min-height:0;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;border-radius:12px}.market-title{font-size:15px}.market-code{font-size:12px;margin-top:5px}.market-bottom{margin:0;flex-direction:column;align-items:flex-end;gap:5px}.market-bottom .value{font-size:20px}.market-bottom .hint{font-size:11px}.panel{border-radius:13px;margin-top:13px}.panel-head{align-items:flex-start;flex-direction:column;padding:19px 15px}.panel-title h2{font-size:18px}.controls{width:100%;justify-content:space-between}.seg button{padding:8px 10px;font-size:12px}.chart-content{height:420px;padding:13px 9px 15px}.chart-status{gap:8px;padding:3px 8px}.chart-status strong{font-size:20px}.stamp{margin-left:0;flex-basis:100%}.panel-foot{padding:12px 15px;font-size:11px}.explainer{grid-template-columns:1fr;gap:10px;margin-bottom:30px}.explainer article{padding:16px 18px}.explainer .glyph{margin-bottom:8px}.footer-inner{flex-direction:column;gap:5px}}
+.sync-status{display:inline-flex;align-items:center;gap:8px;max-width:100%;margin-top:13px;padding:8px 11px;border:1px solid #dfe9e4;background:#f1f8f4;color:#41765d;border-radius:9px;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums}
+.sync-status:before{content:"";width:7px;height:7px;flex:none;border-radius:50%;background:#3b9d72}
+.sync-status.late{border-color:#f1d9aa;background:#fff8e9;color:#906527}
+.sync-status.late:before{background:#d99527}
+.sync-status.error{border-color:#e4e8ed;background:#f6f7f9;color:#8a96a5}
+.sync-status.error:before{background:#9ba7b5}
+@media(max-width:760px){.sync-status{display:flex;align-items:flex-start;font-size:12px;margin-top:12px}.sync-status:before{margin-top:5px}}
 </style>
 </head>
 <body>
 <header class="topbar"><div class="shell bar-inner"><a href="./" class="brand"><span class="mark">◆</span><span>金价视界<small>GOLD VIEW</small></span></a><nav class="nav"><a href="#markets">行情图表</a><a href="#about">数据说明</a><button class="share" id="shareBtn" type="button">分享网站</button></nav></div></header>
 <main class="shell">
-<div class="intro"><div class="eyebrow">✦ GOLD MARKET OVERVIEW</div><h1>黄金行情，一目了然。</h1><p>国际黄金、国内黄金、品牌金店，三个市场，一站看懂。</p></div>
+<div class="intro"><div class="eyebrow">✦ GOLD MARKET OVERVIEW</div><h1>黄金行情，一目了然。</h1><p>国际黄金、国内黄金、品牌金店，三个市场，一站看懂。</p><div class="sync-status error" id="syncStatus" role="status" aria-live="polite">正在检查行情更新时间…</div></div>
 <section class="markets" id="markets">
 <button class="market" data-market="intl" aria-pressed="false" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value" id="intlPrice">—</div><div class="hint">美元 / 盎司</div></div></button>
 <button class="market active" data-market="china" aria-pressed="true" type="button"><div><div class="market-title">上海黄金现货</div><div class="market-code">Au99.99 · 上海黄金交易所</div></div><div class="market-bottom"><div class="value" id="domesticPrice">—</div><div class="hint">人民币 / 克</div></div></button>
@@ -98,6 +105,7 @@ async function getJson(url){
  else if(requested.pathname==='/api/xau/intraday')file='./data/xau-intraday.json';
  else if(requested.pathname==='/api/sge/history')file='./data/sge-history.json';
  else if(requested.pathname==='/api/sge/intraday')file='./data/sge-intraday.json';
+ else if(requested.pathname==='/api/sync/status')file='./data/sync-status.json';
  else if(requested.pathname==='/api/brand'){
   var b=requested.searchParams.get('name');
   if(!['chowtaifook','laofengxiang','zhouliufu'].includes(b))throw Error('unknown brand');
@@ -105,6 +113,30 @@ async function getJson(url){
  }else throw Error('unknown data source');
  var r=await fetch(file+'?v='+Date.now(),{cache:'no-store'}),d=await r.json();
  if(!r.ok||!d.ok)throw Error('source error');return d;
+}
+var syncLastRun=null,syncInfo=null;
+function showSyncStatus(info){
+ var node=document.getElementById('syncStatus'),last=Date.parse(info.sources&&info.sources['xau-latest']);
+ var valid=Number.isFinite(last),late=!valid||Date.now()-last>=2*60*60*1000;
+ var incomplete=info.successful<info.total;
+ var dateLabel=valid?new Date(last).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'未知';
+ node.className='sync-status'+(late||incomplete?' late':'');
+ node.textContent=(late?'数据更新延迟':'行情已同步')+' · 国际金价缓存更新于 '+dateLabel+'（北京时间）'+(incomplete?' · 部分数据源抓取失败 '+info.successful+'/'+info.total:'');
+}
+async function refreshSyncStatus(){
+ try{
+  var info=await getJson('/api/sync/status'),changed=syncLastRun!==null&&info.lastRunAt!==syncLastRun;
+  syncLastRun=info.lastRunAt;syncInfo=info;
+  showSyncStatus(info);
+  if(changed){
+   loadIntlPrice();
+   if(market==='china')loadChina(true);
+   else if(market==='intl'&&intlMode==='simple')loadIntl(true);
+   else if(market==='retail')loadBrand(true);
+   getJson('/api/sge/history').then(function(j){if(j.points.length)document.getElementById('domesticPrice').textContent=money.format(j.points[j.points.length-1].close)}).catch(function(){});
+   getJson('/api/brand?name=chowtaifook').then(function(j){if(j.points.length){brands.chowtaifook=j.points;document.getElementById('retailPrice').textContent=money.format(j.points[j.points.length-1].close)}}).catch(function(){});
+  }
+ }catch(e){if(!syncInfo){var node=document.getElementById('syncStatus');node.className='sync-status error';node.textContent='暂时无法获取自动更新状态';}}
 }
 var intlQuoteTimestamp=0;
 function showIntlPrice(quote){
@@ -248,6 +280,9 @@ var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redr
 // Load the default Shanghai market and prefill the retail-market card.
 setMarket('china');
 loadIntlPrice();
+refreshSyncStatus();
+setInterval(refreshSyncStatus,5*60*1000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshSyncStatus()});
 getJson('/api/brand?name=chowtaifook').then(function(j){
  if(!j.points.length)return;
  brands.chowtaifook=j.points;
