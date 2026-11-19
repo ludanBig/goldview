@@ -23,6 +23,7 @@
 <button class="market" data-market="retail" aria-pressed="false" type="button"><div><div class="market-title">品牌金店黄金</div><div class="market-code">周大福 · 老凤祥 · 周六福</div></div><div class="market-bottom"><div class="value" id="retailPrice">—</div><div class="hint">黄金饰品 / 元每克</div></div></button>
 </section>
 <section class="panel" aria-label="黄金价格走势图"><div class="panel-head"><div class="panel-title"><h2 id="panelTitle">上海黄金 Au99.99 走势</h2><p id="panelSubtitle">Au99.99 · 元/克 · 上海黄金交易所</p></div><div class="controls">
+<div class="seg hidden" id="intlModeControl"><button data-intl-mode="simple" class="selected" type="button">简洁图表</button><button data-intl-mode="tv" type="button">专业图表</button></div>
 <div class="seg" id="rangeControl"><button data-range="day" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" class="selected" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
 <div class="seg" id="typeControl"><button data-type="line" class="selected" type="button">走势</button><button data-type="candle" type="button">K线</button></div>
 <button class="refresh" id="refreshBtn" type="button">刷新</button></div></div>
@@ -35,17 +36,23 @@
 <script>
 (function(){
 'use strict';
-var market='china',range='3m',type='line',brand='chowtaifook',hist=[],intraday=[],brands={},quotes={};
+var market='china',range='3m',type='line',brand='chowtaifook',intlMode='simple',hist=[],intraday=[],intlHist=[],intlIntraday=[],brands={},quotes={};
 var graph=document.getElementById('graph'),priceNode=document.getElementById('currentPrice');
 var money=new Intl.NumberFormat('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
 document.getElementById('year').textContent=new Date().getFullYear();
 document.getElementById('shareBtn').addEventListener('click',async function(){try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);this.textContent='链接已复制';var self=this;setTimeout(function(){self.textContent='分享网站'},1800)}}catch(e){}});
 document.querySelectorAll('[data-market]').forEach(function(b){b.addEventListener('click',function(){setMarket(b.dataset.market)})});
-document.querySelectorAll('[data-range]').forEach(function(b){b.addEventListener('click',function(){range=b.dataset.range;setSelected('[data-range]',b);if(market==='china')loadChina();else draw()})});
+document.querySelectorAll('[data-range]').forEach(function(b){b.addEventListener('click',function(){range=b.dataset.range;setSelected('[data-range]',b);document.getElementById('typeControl').classList.toggle('hidden',range==='day'||(market==='intl'&&!intlHist.some(function(p){return Number.isFinite(p.open)})));if(market==='china')loadChina();else if(market==='intl'&&intlMode==='simple')loadIntl();else draw()})});
 document.querySelectorAll('[data-type]').forEach(function(b){b.addEventListener('click',function(){type=b.dataset.type;setSelected('[data-type]',b);draw()})});
+document.querySelectorAll('[data-intl-mode]').forEach(function(b){b.addEventListener('click',function(){setIntlMode(b.dataset.intlMode)})});
 document.querySelectorAll('[data-brand]').forEach(function(b){b.addEventListener('click',function(){brand=b.dataset.brand;setSelected('[data-brand]',b);loadBrand()})});
-document.getElementById('refreshBtn').addEventListener('click',function(){if(market==='china')loadChina(true);else if(market==='retail')loadBrand(true)});
+document.getElementById('refreshBtn').addEventListener('click',function(){if(market==='china')loadChina(true);else if(market==='intl'&&intlMode==='simple')loadIntl(true);else if(market==='retail')loadBrand(true)});
 function setSelected(selector,b){document.querySelectorAll(selector).forEach(function(x){x.classList.toggle('selected',x===b)})}
+function setIntlMode(mode){
+ intlMode=mode;
+ document.querySelectorAll('[data-intl-mode]').forEach(function(b){b.classList.toggle('selected',b.dataset.intlMode===mode)});
+ setMarket('intl');
+}
 var tradingViewInitialized=false;
 function mountTradingView(){
  if(tradingViewInitialized||market!=='intl')return;
@@ -60,26 +67,35 @@ function mountTradingView(){
  script.type='text/javascript';script.async=true;
  script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
  script.textContent=JSON.stringify({"autosize":true,"symbol":"OANDA:XAUUSD","interval":"D","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"});
+ script.onerror=function(){tradingViewInitialized=false;parent.textContent='';if(market==='intl'&&intlMode==='tv')setIntlMode('simple')};
  container.appendChild(script);parent.appendChild(container);
 }
 function setMarket(m){
- market=m;document.querySelectorAll('[data-market]').forEach(function(b){b.classList.toggle('active',b.dataset.market===m);b.setAttribute('aria-pressed',String(b.dataset.market===m))});
- document.getElementById('intlView').classList.toggle('hidden',m!=='intl');document.getElementById('dataView').classList.toggle('hidden',m==='intl');
- if(m==='intl')requestAnimationFrame(mountTradingView);
- document.getElementById('rangeControl').classList.toggle('hidden',m!=='china');document.getElementById('typeControl').classList.toggle('hidden',m!=='china'||range==='day');
- document.getElementById('brandSelector').classList.toggle('hidden',m!=='retail');document.getElementById('refreshBtn').classList.toggle('hidden',m==='intl');
+ market=m;
+ var intlSimple=m==='intl'&&intlMode==='simple',intlTv=m==='intl'&&intlMode==='tv';
+ document.querySelectorAll('[data-market]').forEach(function(b){b.classList.toggle('active',b.dataset.market===m);b.setAttribute('aria-pressed',String(b.dataset.market===m))});
+ document.getElementById('intlView').classList.toggle('hidden',!intlTv);
+ document.getElementById('dataView').classList.toggle('hidden',intlTv);
+ if(intlTv)requestAnimationFrame(mountTradingView);
+ document.getElementById('intlModeControl').classList.toggle('hidden',m!=='intl');
+ document.getElementById('rangeControl').classList.toggle('hidden',m==='retail'||intlTv);
+ document.getElementById('typeControl').classList.toggle('hidden',m==='retail'||intlTv||range==='day'||(intlSimple&&!intlHist.some(function(p){return Number.isFinite(p.open)})));
+ document.getElementById('brandSelector').classList.toggle('hidden',m!=='retail');
+ document.getElementById('refreshBtn').classList.toggle('hidden',intlTv);
  var title=m==='intl'?'国际现货黄金走势':m==='china'?'上海黄金 Au99.99 走势':'品牌金店黄金价格走势';
- var sub=m==='intl'?'XAU/USD · TradingView 专业图表':m==='china'?'Au99.99 · 元/克 · 上海黄金交易所':'黄金饰品挂牌参考价 · 元/克';
+ var sub=m==='intl'?(intlTv?'XAU/USD · TradingView 专业图表':'XAU/USD · 美元/盎司 · 简洁行情'):m==='china'?'Au99.99 · 元/克 · 上海黄金交易所':'黄金饰品挂牌参考价 · 元/克';
  document.getElementById('panelTitle').textContent=title;document.getElementById('panelSubtitle').textContent=sub;
- document.getElementById('sourceLink').href=m==='intl'?'https://cn.tradingview.com/symbols/XAUUSD/':m==='china'?'https://www.sge.com.cn/sjzx/mrhq':'https://www.hjjg.net/chowtaifook/history.html';
- document.getElementById('disclosure').textContent=m==='intl'?'国际金价卡片采用 Gold API 参考报价，走势由 TradingView 提供；两个来源可能存在差异或延时。':m==='china'?'上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。':'品牌金店挂牌参考价可能因城市、门店及加工费不同而变化。';
- if(m==='china')loadChina();else if(m==='retail')loadBrand();
+ document.getElementById('sourceLink').href=m==='intl'?(intlTv?'https://cn.tradingview.com/symbols/XAUUSD/':'https://xaus.com/api/'):m==='china'?'https://www.sge.com.cn/sjzx/mrhq':'https://www.hjjg.net/chowtaifook/history.html';
+ document.getElementById('disclosure').textContent=m==='intl'?(intlTv?'TradingView 专业图表需连接境外服务；若无法加载，请切换简洁图表。':'简洁图表采用网站缓存的 XAU/USD 历史行情，按计划更新；顶部价格来自其他参考源，可能存在差异。'):m==='china'?'上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。':'品牌金店挂牌参考价可能因城市、门店及加工费不同而变化。';
+ if(intlSimple)loadIntl();else if(m==='china')loadChina();else if(m==='retail')loadBrand();
 }
 function fail(){graph.innerHTML='<div class="empty"><strong>暂时无法读取行情</strong><span>数据源暂不可用，请稍后刷新重试。</span><a class="muted-link" target="_blank" rel="noopener noreferrer" href="'+document.getElementById('sourceLink').href+'">打开数据来源查看</a></div>'}
 function spin(){priceNode.textContent='—';document.getElementById('changeLabel').textContent='';document.getElementById('dataStamp').textContent='';graph.innerHTML='<div class="empty"><span class="spin"></span>正在读取行情…</div>'}
 async function getJson(url){
  var requested=new URL(url,'https://goldview.local'),file;
  if(requested.pathname==='/api/xau/price')file='./data/xau-latest.json';
+ else if(requested.pathname==='/api/xau/history')file='./data/xau-history.json';
+ else if(requested.pathname==='/api/xau/intraday')file='./data/xau-intraday.json';
  else if(requested.pathname==='/api/sge/history')file='./data/sge-history.json';
  else if(requested.pathname==='/api/sge/intraday')file='./data/sge-intraday.json';
  else if(requested.pathname==='/api/brand'){
@@ -107,6 +123,28 @@ function loadIntlPrice(){
   .then(function(response){if(!response.ok)throw Error('XAU feed unavailable');return response.json()})
   .then(showIntlPrice).catch(function(){});
 }
+function intlSource(){
+ return range==='day'?quotes.intlIntraday:quotes.intlHistory;
+}
+function syncIntlSourceLink(){
+ document.getElementById('sourceLink').href=(intlSource()||'XAUS').startsWith('XAUS')?
+  'https://xaus.com/api/':'https://quote.eastmoney.com/option/122.XAU.html';
+}
+async function loadIntl(force){
+ var key=range==='day'?'intraday':'history',cached=key==='intraday'?intlIntraday:intlHist;
+ if(cached.length&&!force){syncIntlSourceLink();if(market==='intl'&&intlMode==='simple')draw();return}
+ spin();
+ try{
+  var j=await getJson('/api/xau/'+key+(force?'?refresh=1':''));
+  if(j.symbol!=='XAU/USD'||!Array.isArray(j.points)||j.points.length<5)throw Error('Invalid XAU history');
+  if(key==='intraday')intlIntraday=j.points;else intlHist=j.points;
+  if(key==='intraday')quotes.intlIntraday=j.source||'XAU/USD 参考行情';
+  else quotes.intlHistory=j.source||'XAU/USD 参考行情';
+  syncIntlSourceLink();
+  document.getElementById('typeControl').classList.toggle('hidden',range==='day'||!intlHist.some(function(p){return Number.isFinite(p.open)}));
+  if(market==='intl'&&intlMode==='simple')draw();
+ }catch(e){if(market==='intl'&&intlMode==='simple')fail()}
+}
 async function loadChina(force){
  var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
  spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china=j.quoteTime||'延时行情'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
@@ -119,23 +157,31 @@ async function loadBrand(force){
 }
 function activeSeries(){
  if(market==='retail')return brands[brand]||[];
- if(market!=='china')return [];
- if(range==='day')return intraday;
- if(!hist.length)return[];
- if(range==='all')return hist;
- var n=range==='1m'?31:range==='3m'?93:366,cut=Date.parse(hist[hist.length-1].date+'T00:00:00Z')-n*86400000;
- return hist.filter(function(p){return Date.parse(p.date+'T00:00:00Z')>=cut});
+ var history;
+ if(market==='intl'){
+  if(intlMode!=='simple')return [];
+  if(range==='day')return intlIntraday;
+  history=intlHist;
+ }else if(market==='china'){
+  if(range==='day')return intraday;
+  history=hist;
+ }else return [];
+ if(!history.length)return [];
+ if(range==='all')return history;
+ var n=range==='1m'?31:range==='3m'?93:366,cut=Date.parse(history[history.length-1].date+'T00:00:00Z')-n*86400000;
+ return history.filter(function(p){return Date.parse(p.date+'T00:00:00Z')>=cut});
 }
 function draw(){
  var series=activeSeries();if(!series.length){fail();return}
  var latest=series[series.length-1],prev=series.length>1?series[series.length-2].close:latest.close;
- priceNode.textContent=money.format(latest.close)+' 元/克';
+ var unit=market==='intl'?'美元/盎司':'元/克';
+ priceNode.textContent=money.format(latest.close)+' '+unit;
  var change=latest.close-prev,percent=prev?change/prev*100:0,node=document.getElementById('changeLabel');
  node.textContent=(change>=0?'+':'')+change.toFixed(2)+' ('+(percent>=0?'+':'')+percent.toFixed(2)+'%)';node.style.color=change>=0?'#dc625d':'#168c70';
- var stamp=market==='retail'?'最近报价 '+latest.date+' · '+(quotes.retail||'公开报价'):range==='day'?(quotes.china||'盘中延时行情')+' · 延时参考':'历史日线截至 '+latest.date;
+ var stamp=market==='retail'?'最近报价 '+latest.date+' · '+(quotes.retail||'公开报价'):market==='intl'?(range==='day'?'分时截至 '+latest.date+' '+latest.time+' · '+(intlSource()||'XAU/USD 参考行情'):'历史日线截至 '+latest.date+' · '+(intlSource()||'XAU/USD 参考行情')):range==='day'?(quotes.china||'盘中延时行情')+' · 延时参考':'历史日线截至 '+latest.date;
  document.getElementById('dataStamp').textContent=stamp;
  if(market==='china')document.getElementById('domesticPrice').textContent=money.format(latest.close);
- else document.getElementById('retailPrice').textContent=money.format(latest.close);
+ else if(market==='retail')document.getElementById('retailPrice').textContent=money.format(latest.close);
  var bounds=graph.getBoundingClientRect(),w=Math.max(320,Math.round(bounds.width)),h=Math.max(280,Math.round(bounds.height));
  var L=13,T=18,R=68,B=38,cw=w-L-R,ch=h-T-B;
  var lo=Math.min.apply(null,series.map(function(p){return p.low||p.close})),hi=Math.max.apply(null,series.map(function(p){return p.high||p.close}));
@@ -144,17 +190,17 @@ function draw(){
  function Y(v){return T+(hi-v)/(hi-lo)*ch}
  var html=['<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="黄金价格走势图"><defs><linearGradient id="goldshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c99b52" stop-opacity=".21"/><stop offset="100%" stop-color="#c99b52" stop-opacity="0"/></linearGradient></defs>'];
  for(var i=0;i<5;i++){var gy=T+i*ch/4;html.push('<line x1="'+L+'" y1="'+gy+'" x2="'+(w-49)+'" y2="'+gy+'" stroke="#edf1f5" stroke-dasharray="3 5"/><text x="'+(w-43)+'" y="'+(gy+4)+'" fill="#9aa6b3" font-size="12">'+(hi-i*(hi-lo)/4).toFixed(1)+'</text>')}
- [0,.25,.5,.75,1].forEach(function(v){var ix=Math.round(v*(series.length-1)),label=series[ix].date||series[ix].time||'';if(label.length>=10)label=label.slice(5);html.push('<text x="'+X(ix)+'" y="'+(h-10)+'" text-anchor="middle" fill="#9aa6b3" font-size="12">'+label+'</text>')});
- var candle=market==='china'&&range!=='day'&&type==='candle';
+ [0,.25,.5,.75,1].forEach(function(v){var ix=Math.round(v*(series.length-1)),label=range==='day'?(series[ix].time||series[ix].date||''):(series[ix].date||series[ix].time||'');if(label.length>=10)label=label.slice(5);html.push('<text x="'+X(ix)+'" y="'+(h-10)+'" text-anchor="middle" fill="#9aa6b3" font-size="12">'+label+'</text>')});
+ var candle=(market==='china'||market==='intl')&&range!=='day'&&type==='candle'&&series.every(function(p){return Number.isFinite(p.open)&&Number.isFinite(p.high)&&Number.isFinite(p.low)});
  if(candle){var bar=Math.max(1.2,Math.min(11,cw/series.length*.65));series.forEach(function(p,i){var x=X(i),c=p.close>=p.open?'#e25d58':'#16a17b';html.push('<line x1="'+x+'" y1="'+Y(p.high)+'" x2="'+x+'" y2="'+Y(p.low)+'" stroke="'+c+'" stroke-width="1.2"/><rect x="'+(x-bar/2)+'" y="'+Math.min(Y(p.open),Y(p.close))+'" width="'+bar+'" height="'+Math.max(1,Math.abs(Y(p.open)-Y(p.close)))+'" fill="'+c+'"/>')})}
  else{var path=series.map(function(p,i){return(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.close).toFixed(1)}).join(' ');html.push('<path d="'+path+' L'+X(series.length-1)+' '+(T+ch)+' L'+X(0)+' '+(T+ch)+' Z" fill="url(#goldshade)"/><path d="'+path+'" fill="none" stroke="#bd8940" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>')}
  html.push('<rect id="plotHover" x="'+L+'" y="'+T+'" width="'+cw+'" height="'+ch+'" fill="transparent"/><line id="plotCross" x1="0" x2="0" y1="'+T+'" y2="'+(T+ch)+'" stroke="#ab8a58" stroke-dasharray="5 5" visibility="hidden"/></svg><div id="plotTip" class="hover-tip hidden"></div>');
  graph.innerHTML=html.join('');
  var hover=graph.querySelector('#plotHover'),cross=graph.querySelector('#plotCross'),tip=graph.querySelector('#plotTip');
- hover.addEventListener('pointermove',function(ev){var pos=graph.getBoundingClientRect(),px=(ev.clientX-pos.left)/pos.width*w,index=Math.round((px-L)/cw*(series.length-1));index=Math.max(0,Math.min(series.length-1,index));var p=series[index],x=X(index),y=Y(p.close);cross.setAttribute('visibility','visible');cross.setAttribute('x1',x);cross.setAttribute('x2',x);tip.classList.remove('hidden');tip.style.left=(x/w*100)+'%';tip.style.top=Math.max(75,y)+'px';tip.innerHTML='<span style="opacity:.7">'+(p.date||p.time||'')+'</span><div><strong>'+money.format(p.close)+' 元/克</strong></div>'+(candle?'<div>开 '+money.format(p.open)+'　高 '+money.format(p.high)+'</div><div>低 '+money.format(p.low)+'　收 '+money.format(p.close)+'</div>':'')});
+ hover.addEventListener('pointermove',function(ev){var pos=graph.getBoundingClientRect(),px=(ev.clientX-pos.left)/pos.width*w,index=Math.round((px-L)/cw*(series.length-1));index=Math.max(0,Math.min(series.length-1,index));var p=series[index],x=X(index),y=Y(p.close);cross.setAttribute('visibility','visible');cross.setAttribute('x1',x);cross.setAttribute('x2',x);tip.classList.remove('hidden');tip.style.left=(x/w*100)+'%';tip.style.top=Math.max(75,y)+'px';tip.innerHTML='<span style="opacity:.7">'+(p.date||p.time||'')+'</span><div><strong>'+money.format(p.close)+' '+unit+'</strong></div>'+(candle?'<div>开 '+money.format(p.open)+'　高 '+money.format(p.high)+'</div><div>低 '+money.format(p.low)+'　收 '+money.format(p.close)+'</div>':'')});
  hover.addEventListener('pointerleave',function(){cross.setAttribute('visibility','hidden');tip.classList.add('hidden')});
 }
-var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redraw=setTimeout(function(){if(market!=='intl'&&activeSeries().length)draw()},160)});
+var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redraw=setTimeout(function(){if((market!=='intl'||intlMode==='simple')&&activeSeries().length)draw()},160)});
 // Load the default Shanghai market and prefill the retail-market card.
 setMarket('china');
 loadIntlPrice();
