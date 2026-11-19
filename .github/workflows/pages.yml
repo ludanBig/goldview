@@ -5,8 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    # UTC: refresh six times a day; GitHub's scheduler may be delayed.
-    - cron: '13 0,4,8,12,16,20 * * *'
+    # UTC: refresh once an hour at minute 13; scheduled runs may be delayed.
+    - cron: '13 * * * *'
 
 permissions:
   contents: write
