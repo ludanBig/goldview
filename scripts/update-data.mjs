@@ -57,11 +57,34 @@ export function parseDaily(data) {
   return { ok: true, source: '上海黄金交易所', symbol: 'Au99.99', points };
 }
 
+function clockMinutes(value) {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value));
+  if (!match) return null;
+  const hour = Number(match[1]), minute = Number(match[2]);
+  return hour < 24 && minute < 60 ? hour * 60 + minute : null;
+}
+
+// SGE returns a complete night-plus-day minute grid, including future slots.
+function tradingMinute(value, clampToSession = false) {
+  const minute = clockMinutes(value);
+  if (minute === null) return null;
+  if (minute >= 20 * 60) return minute - 20 * 60;
+  if (minute <= 2 * 60 + 30) return minute + 4 * 60;
+  if (minute >= 9 * 60 && minute <= 15 * 60 + 30) return 391 + minute - 9 * 60;
+  if (!clampToSession) return null;
+  return minute < 9 * 60 ? 390 : 781;
+}
+
 export function parseIntraday(data) {
   const times = Array.isArray(data.times) ? data.times : [];
   const values = Array.isArray(data.data) ? data.data : [];
-  const points = times.map((time, i) => ({ time: String(time), close: num(values[i]) }))
-    .filter((p) => p.close !== null);
+  const quoted = /(\d{1,2}:\d{2})(?::\d{2})?\s*$/.exec(String(data.delaystr || ''));
+  const cutoff = quoted ? tradingMinute(quoted[1], true) : null;
+  if (cutoff === null) throw new Error('SGE intraday quote time unavailable');
+  const points = times.map((time, i) => ({ time: String(time), close: num(values[i]), minute: tradingMinute(time) }))
+    .filter((p) => p.minute !== null && p.minute <= cutoff && p.close !== null)
+    .sort((a, b) => a.minute - b.minute)
+    .map(({ time, close }) => ({ time, close }));
   if (points.length < 5) throw new Error('SGE intraday history has too few valid rows');
   return { ok: true, source: '上海黄金交易所', quoteTime: String(data.delaystr || ''), points };
 }

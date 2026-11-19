@@ -27,8 +27,38 @@ test('SGE daily OHLC parsing and date sort', () => {
 });
 
 test('SGE intraday data', () => {
-  const data = parseIntraday({ times: ['9:00', '9:01', '9:02', '9:03', '9:04'], data: [810, 811, 812, 813, 814] });
+  const data = parseIntraday({ delaystr: '2026年11月20日 09:04:59', times: ['9:00', '9:01', '9:02', '9:03', '9:04'], data: [810, 811, 812, 813, 814] });
   assert.equal(data.points.at(-1).close, 814);
+});
+
+test('SGE intraday excludes future placeholders after the night quote', () => {
+  const night = Array.from({ length: 391 }, (_, i) => {
+    const minutes = (20 * 60 + i) % (24 * 60);
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  });
+  const day = Array.from({ length: 391 }, (_, i) => {
+    const minutes = 9 * 60 + i;
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  });
+  const times = [...night, ...day];
+  const prices = times.map((_, i) => i <= 135 ? 801.3 : 795.5);
+  const input = { delaystr: '2026年11月20日 22:15:55', times, data: prices };
+  const evening = parseIntraday(input);
+  assert.equal(evening.points.length, 136);
+  assert.deepEqual(evening.points.at(-1), { time: '22:15', close: 801.3 });
+
+  const midnight = parseIntraday({ ...input, delaystr: '2026年11月20日 01:07:00' });
+  assert.equal(midnight.points.length, 308);
+  assert.equal(midnight.points.at(-1).time, '01:07');
+
+  const morning = parseIntraday({ ...input, delaystr: '2026年11月20日 10:02:00' });
+  assert.equal(morning.points.length, 454);
+  assert.equal(morning.points.at(-1).time, '10:02');
+
+  const closed = parseIntraday({ ...input, delaystr: '2026年11月20日 15:45:00' });
+  assert.equal(closed.points.length, 782);
+  assert.equal(closed.points.at(-1).time, '15:30');
+  assert.throws(() => parseIntraday({ ...input, delaystr: '' }), /quote time unavailable/);
 });
 
 test('Brand price parser chooses ornament rather than platinum quote', () => {

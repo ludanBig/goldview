@@ -179,7 +179,7 @@ async function loadIntl(force){
 }
 async function loadChina(force){
  var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
- spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china=j.quoteTime||'延时行情'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
+ spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china='分时截至 '+intraday[intraday.length-1].time+'（北京时间）'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
 }
 async function loadBrand(force){
  var requestedBrand=brand;
@@ -218,22 +218,36 @@ function draw(){
  var L=13,T=18,R=68,B=38,cw=w-L-R,ch=h-T-B;
  var lo=Math.min.apply(null,series.map(function(p){return p.low||p.close})),hi=Math.max.apply(null,series.map(function(p){return p.high||p.close}));
  var gap=(hi-lo)*.13||Math.max(1,hi*.005);lo-=gap;hi+=gap;
- function X(i){return L+(series.length===1?cw/2:i/(series.length-1)*cw)}
+ var sessionBreak=-1;
+ if(market==='china'&&range==='day'){
+  for(var k=1;k<series.length;k++){
+   if(series[k-1].time<='02:30'&&series[k].time>='09:00'){sessionBreak=k;break}
+  }
+ }
+ var sessionGap=sessionBreak>=0?22:0;
+ function X(i){return L+(series.length===1?cw/2:i/(series.length-1)*(cw-sessionGap))+(sessionBreak>=0&&i>=sessionBreak?sessionGap:0)}
  function Y(v){return T+(hi-v)/(hi-lo)*ch}
  var html=['<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="黄金价格走势图"><defs><linearGradient id="goldshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c99b52" stop-opacity=".21"/><stop offset="100%" stop-color="#c99b52" stop-opacity="0"/></linearGradient></defs>'];
  for(var i=0;i<5;i++){var gy=T+i*ch/4;html.push('<line x1="'+L+'" y1="'+gy+'" x2="'+(w-49)+'" y2="'+gy+'" stroke="#edf1f5" stroke-dasharray="3 5"/><text x="'+(w-43)+'" y="'+(gy+4)+'" fill="#9aa6b3" font-size="12">'+(hi-i*(hi-lo)/4).toFixed(1)+'</text>')}
  [0,.25,.5,.75,1].forEach(function(v){var ix=Math.round(v*(series.length-1)),label=range==='day'?(series[ix].time||series[ix].date||''):(series[ix].date||series[ix].time||'');if(label.length>=10)label=label.slice(5);html.push('<text x="'+X(ix)+'" y="'+(h-10)+'" text-anchor="middle" fill="#9aa6b3" font-size="12">'+label+'</text>')});
  var candle=(market==='china'||market==='intl')&&range!=='day'&&type==='candle'&&series.every(function(p){return Number.isFinite(p.open)&&Number.isFinite(p.high)&&Number.isFinite(p.low)});
  if(candle){var bar=Math.max(1.2,Math.min(11,cw/series.length*.65));series.forEach(function(p,i){var x=X(i),c=p.close>=p.open?'#e25d58':'#16a17b';html.push('<line x1="'+x+'" y1="'+Y(p.high)+'" x2="'+x+'" y2="'+Y(p.low)+'" stroke="'+c+'" stroke-width="1.2"/><rect x="'+(x-bar/2)+'" y="'+Math.min(Y(p.open),Y(p.close))+'" width="'+bar+'" height="'+Math.max(1,Math.abs(Y(p.open)-Y(p.close)))+'" fill="'+c+'"/>')})}
- else{var path=series.map(function(p,i){return(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.close).toFixed(1)}).join(' ');html.push('<path d="'+path+' L'+X(series.length-1)+' '+(T+ch)+' L'+X(0)+' '+(T+ch)+' Z" fill="url(#goldshade)"/><path d="'+path+'" fill="none" stroke="#bd8940" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>')}
+ else{
+  var starts=sessionBreak>=0?[0,sessionBreak]:[0],ends=sessionBreak>=0?[sessionBreak,series.length]:[series.length];
+  starts.forEach(function(start,part){
+   var end=ends[part],path=series.slice(start,end).map(function(p,i){return(i?'L':'M')+X(start+i).toFixed(1)+' '+Y(p.close).toFixed(1)}).join(' ');
+   html.push('<path d="'+path+' L'+X(end-1)+' '+(T+ch)+' L'+X(start)+' '+(T+ch)+' Z" fill="url(#goldshade)"/><path d="'+path+'" fill="none" stroke="#bd8940" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>');
+  });
+ }
  html.push('<rect id="plotHover" x="'+L+'" y="'+T+'" width="'+cw+'" height="'+ch+'" fill="transparent"/><line id="plotCross" x1="0" x2="0" y1="'+T+'" y2="'+(T+ch)+'" stroke="#ab8a58" stroke-dasharray="5 5" visibility="hidden"/><circle id="plotDot" cx="0" cy="0" r="4" fill="#bd8940" stroke="#fff" stroke-width="2" visibility="hidden"/></svg><div id="plotTip" class="hover-tip hidden"></div>');
  graph.innerHTML=html.join('');
  var hover=graph.querySelector('#plotHover'),cross=graph.querySelector('#plotCross'),dot=graph.querySelector('#plotDot'),tip=graph.querySelector('#plotTip');
  var activeTouchPointer=null;
  function inspectPoint(ev){
   var pos=graph.getBoundingClientRect(),px=(ev.clientX-pos.left)/pos.width*w;
-  var index=Math.round((px-L)/cw*(series.length-1));
-  index=Math.max(0,Math.min(series.length-1,index));
+  var low=0,high=series.length-1;
+  while(low<high){var mid=Math.floor((low+high)/2);if(X(mid)<px)low=mid+1;else high=mid}
+  var index=low>0&&Math.abs(X(low-1)-px)<Math.abs(X(low)-px)?low-1:low;
   var p=series[index],x=X(index),y=Y(p.close);
   var pointLabel=range==='day'?(p.date?p.date+' ':'')+(p.time||''):(p.date||p.time||'');
   cross.setAttribute('visibility','visible');cross.setAttribute('x1',x);cross.setAttribute('x2',x);
