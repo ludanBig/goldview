@@ -144,6 +144,55 @@ export function parseXauHistory(payload, intraday = false) {
   };
 }
 
+
+async function fetchXaus(path) {
+  return JSON.parse(await fetchText('https://xaus.com/api/v1/' + path, {
+    headers: { accept: 'application/json' }
+  }));
+}
+
+export function parseXausHistory(data) {
+  if (data?.symbol !== 'XAUUSD' || !Array.isArray(data.points)) {
+    throw new Error('XAUS XAUUSD daily history unavailable');
+  }
+  const points = data.points.map((row) => {
+    const date = dateOf(row?.d), close = num(row?.c), high = num(row?.h), low = num(row?.l);
+    if (!date || !close || !high || !low || high < low || close > high || close < low) return null;
+    const point = { date, close, high, low };
+    const open = num(row?.o);
+    if (open && open >= low && open <= high) point.open = open;
+    return point;
+  }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
+  const unique = points.filter((row, i) => i === 0 || row.date !== points[i - 1].date);
+  if (unique.length < 5) throw new Error('XAUS XAUUSD daily history unexpectedly small');
+  return { ok: true, source: 'XAUS XAU/USD 参考行情', symbol: 'XAU/USD',
+    interval: '1d', quoteTime: unique.at(-1).date, points: unique };
+}
+
+export function parseXausIntraday(data) {
+  if (!Array.isArray(data?.points)) throw new Error('XAUS intraday unavailable');
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  });
+  const points = data.points.map((row) => {
+    const timestamp = typeof row?.t === 'number'
+      ? new Date(row.t < 1e11 ? row.t * 1000 : row.t)
+      : new Date(row?.t);
+    const close = num(row?.p);
+    if (!close || !Number.isFinite(timestamp.valueOf())) return null;
+    const parts = Object.fromEntries(formatter.formatToParts(timestamp).map(({ type, value }) => [type, value]));
+    return { date: parts.year + '-' + parts.month + '-' + parts.day,
+      time: parts.hour + ':' + parts.minute, close };
+  }).filter(Boolean).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const latestDay = points.at(-1)?.date;
+  const latest = points.filter((point) => point.date === latestDay);
+  const unique = latest.filter((point, i) => i === 0 || point.time !== latest[i - 1].time);
+  if (unique.length < 5) throw new Error('XAUS intraday series has too few samples');
+  return { ok: true, source: 'XAUS 5分钟参考采样', symbol: 'XAU/USD',
+    interval: 'sampled-5m', quoteTime: latestDay + ' ' + unique.at(-1).time,
+    points: unique };
+}
 async function update(file, producer, hasSeries = true) {
   const path = new URL('../public/data/' + file + '.json', import.meta.url);
   try {
@@ -165,8 +214,14 @@ async function main() {
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   const jobs = [
     ['xau-latest', async () => parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU', { headers: { accept: 'application/json' } }))), false],
-    ['xau-history', async () => parseXauHistory(await fetchEastmoneyXau(101, 500))],
-    ['xau-intraday', async () => parseXauHistory(await fetchEastmoneyXau(5, 500), true)],
+    ['xau-history', async () => {
+      try { return parseXausHistory(await fetchXaus('history')); }
+      catch { return parseXauHistory(await fetchEastmoneyXau(101, 500)); }
+    }],
+    ['xau-intraday', async () => {
+      try { return parseXausIntraday(await fetchXaus('intraday?symbol=xau&hours=24')); }
+      catch { return parseXauHistory(await fetchEastmoneyXau(5, 500), true); }
+    }],
     ['sge-history', async () => parseDaily(await fetchSge('/graph/Dailyhq', 'POST'))],
     ['sge-intraday', async () => {
       let data;

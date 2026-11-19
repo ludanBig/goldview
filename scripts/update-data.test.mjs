@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXauHistory } from './update-data.mjs';
+import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXauHistory, parseXausHistory, parseXausIntraday } from './update-data.mjs';
 
 test('SGE daily OHLC parsing and date sort', () => {
   const time = Array.from({ length: 5 }, (_, i) => [`2026-11-${String(5 - i).padStart(2, '0')}`, 810, 812 + i, 800, 821]);
@@ -63,4 +63,23 @@ test('Eastmoney parser rejects other products and malformed candles', () => {
     `2026-11-${String(i + 1).padStart(2, '0')},3740,3800,3750,3730`);
   assert.throws(() => parseXauHistory({ rc: 0, data: { code: 'GC', klines: rows } }));
   assert.throws(() => parseXauHistory({ rc: 0, data: { code: 'XAU', klines: rows } }));
+});
+
+test('XAUS daily history supports verified HLC without inventing open', () => {
+  const rows = Array.from({ length: 8 }, (_, i) =>
+    ({ d: `2026-11-${String(i + 1).padStart(2, '0')}`, c: 3743, h: 3750, l: 3730 }));
+  const parsed = parseXausHistory({ symbol: 'XAUUSD', points: rows });
+  assert.equal(parsed.points.length, 8);
+  assert.equal(parsed.points[0].open, undefined);
+  assert.equal(parsed.points[0].close, 3743);
+});
+
+test('XAUS intraday conversion uses Shanghai time and latest calendar day', () => {
+  const samples = Array.from({ length: 8 }, (_, i) => ({
+    t: new Date(Date.UTC(2026, 10, 19, 1, i * 5)).toISOString(), p: 3740 + i
+  }));
+  const parsed = parseXausIntraday({ points: samples });
+  assert.equal(parsed.points.length, 8);
+  assert.equal(parsed.points[0].date, '2026-11-19');
+  assert.equal(parsed.points[0].time, '09:00');
 });
