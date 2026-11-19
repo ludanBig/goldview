@@ -75,7 +75,7 @@ export function parseBrand(html, brand) {
     .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
     .replace(/\s+/g, ' ');
   const title = BRANDS[brand].name;
-  const entry = new RegExp(title + '\\s*(\d{3,4}(?:\\.\d+)?)\\s*元\\/克\\s*\d{3,4}(?:\\.\d+)?\\s*元\\/克\\s*(20\d{2}-\d{1,2}-\d{1,2})', 'g');
+  const entry = new RegExp(title + '\\s*(\\d{3,4}(?:\\.\\d+)?)\\s*元\\/克\\s*\\d{3,4}(?:\\.\\d+)?\\s*元\\/克\\s*(20\\d{2}-\\d{1,2}-\\d{1,2})', 'g');
   const points = Array.from(visible.matchAll(entry), (match) => ({
     date: match[2].replace(/-(\d)(?=-|$)/g, '-0$1'),
     close: num(match[1])
