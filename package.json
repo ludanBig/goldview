@@ -1,0 +1,11 @@
+{
+  "name": "goldview-pages",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-pages.mjs",
+    "update-data": "node scripts/update-data.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

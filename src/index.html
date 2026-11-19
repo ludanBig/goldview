@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f7fa">
+<meta name="description" content="金价视界，简洁查看国际现货黄金、上海黄金交易所 Au99.99 和品牌金店黄金价格走势。">
+<title>金价视界 — 黄金行情，一目了然</title>
+<style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#172736;background:#f6f8fb;font-synthesis:none}*{box-sizing:border-box}body{margin:0;font-size:16px;-webkit-font-smoothing:antialiased}button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}a:hover{color:#bc893e}.shell{max-width:1240px;padding:0 28px;margin:auto}.topbar{height:78px;background:#fff;border-bottom:1px solid #e7ecf2}.bar-inner{height:100%;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:22px;letter-spacing:-.8px}.mark{width:37px;height:37px;border-radius:11px;background:#182f3a;color:#edca8f;display:grid;place-items:center;font-size:22px}.brand small{display:block;font-size:10px;letter-spacing:2px;color:#a0aab4;margin-top:2px}.nav{display:flex;align-items:center;gap:23px;font-size:14px;color:#6b7887}.share{border:1px solid #e0e7ef;background:#fff;border-radius:10px;padding:10px 15px;color:#506171}.share:hover{background:#f3f6f9}.intro{padding:43px 0 27px}.eyebrow{color:#ad823d;letter-spacing:1px;font-size:13px;font-weight:800}.intro h1{font-size:38px;line-height:1.25;letter-spacing:-1.5px;margin:9px 0 10px}.intro p{font-size:15px;color:#7b8897;line-height:1.8;margin:0}.markets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.market{border:1px solid #e1e8ef;box-shadow:0 3px 15px #263b4d05;background:white;text-align:left;min-height:155px;border-radius:16px;padding:23px;position:relative;transition:border-color .18s,transform .18s}.market:hover{border-color:#cdb184;transform:translateY(-1px)}.market.active{border-color:#caa369;box-shadow:0 5px 20px #b38a3920}.market.active:before{content:"";width:4px;background:#be8c42;position:absolute;left:0;top:0;bottom:0;border-radius:16px 0 0 16px}.market-title{font-size:16px;font-weight:750}.market-code{color:#9aa5b2;font-size:13px;margin-top:7px}.market-bottom{display:flex;justify-content:space-between;align-items:end;gap:8px;margin-top:27px}.market-bottom .value{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums;white-space:nowrap}.market-bottom .hint{font-size:12px;color:#8693a0;white-space:nowrap}.market-bottom .unit{font-weight:500;color:#8b98a6;font-size:12px;margin-left:3px}.panel{margin-top:17px;border-radius:18px;overflow:hidden;border:1px solid #e1e8f0;background:#fff;box-shadow:0 7px 25px #283b4e08}.panel-head{min-height:87px;border-bottom:1px solid #edf1f5;padding:21px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px}.panel-title h2{margin:0 0 6px;font-size:20px;letter-spacing:-.5px}.panel-title p{margin:0;color:#97a1ad;font-size:13px}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.seg{display:flex;background:#f3f5f8;border-radius:10px;padding:4px;gap:3px}.seg button{background:none;border:0;padding:8px 12px;color:#778493;border-radius:7px;font-size:13px}.seg button.selected{background:#fff;color:#233440;font-weight:750;box-shadow:0 1px 5px #182f3a18}.refresh{border:1px solid #e2e9f0;background:white;border-radius:9px;padding:10px 12px;color:#637282;font-size:13px}.refresh:hover{background:#f6f8fa}.chart-content{height:490px;padding:15px 22px 18px}.tv{height:100%}.chart-visual{height:100%;display:flex;flex-direction:column}.chart-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 8px;color:#8b98a7;font-size:13px}.chart-status strong{font-size:23px;color:#213340;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.stamp{margin-left:auto;color:#97a3af}.graph{flex:1;min-height:0;position:relative;margin-top:17px}.graph svg{width:100%;height:100%;display:block}.hover-tip{position:absolute;pointer-events:none;z-index:2;transform:translate(-50%,-108%);border-radius:9px;background:#1e3541;color:white;box-shadow:0 10px 25px #152f3d22;padding:9px 13px;font-size:12px;line-height:1.8;white-space:nowrap}.hover-tip strong{font-size:15px}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#8895a5;font-size:14px;padding:20px}.empty strong{color:#425461;font-size:16px}.empty a{color:#ac7e37;text-decoration:underline;text-underline-offset:4px}.spin{width:28px;height:28px;border:3px solid #e8ecf1;border-top-color:#be914c;border-radius:50%;animation:spin .9s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.panel-foot{border-top:1px solid #edf1f5;padding:15px 26px;color:#929eab;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:16px}.panel-foot a{color:#a97f43;font-weight:700;white-space:nowrap}.explainer{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0 50px}.explainer article{background:#fff;border:1px solid #e7ecf2;border-radius:14px;padding:20px 22px}.explainer .glyph{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:#f9f3e9;color:#b58c4e;font-size:20px;margin-bottom:12px}.explainer h3{font-size:15px;margin:0 0 7px}.explainer p{color:#8b96a3;font-size:13px;line-height:1.8;margin:0}.muted-link{color:#a47a39;text-decoration:underline;text-underline-offset:3px}footer{border-top:1px solid #e7edf2;padding:25px 0 35px;color:#95a0ad;font-size:12px;line-height:1.6}.footer-inner{display:flex;justify-content:space-between;gap:20px}.hidden{display:none!important}.brand-selector{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}.brand-selector button{font-size:13px;background:#fff;color:#728091;border:1px solid #e3e9ef;padding:8px 12px;border-radius:9px}.brand-selector button.selected{border-color:#c6a36e;background:#fbf7ee;color:#8c682b;font-weight:700}
+@media(max-width:760px){.shell{padding:0 16px}.topbar{height:68px}.brand{font-size:19px}.nav>a{display:none}.intro{padding:31px 0 24px}.intro h1{font-size:30px}.intro p{font-size:14px}.markets{grid-template-columns:1fr;gap:9px}.market{min-height:0;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;border-radius:12px}.market-title{font-size:15px}.market-code{font-size:12px;margin-top:5px}.market-bottom{margin:0;flex-direction:column;align-items:flex-end;gap:5px}.market-bottom .value{font-size:20px}.market-bottom .hint{font-size:11px}.panel{border-radius:13px;margin-top:13px}.panel-head{align-items:flex-start;flex-direction:column;padding:19px 15px}.panel-title h2{font-size:18px}.controls{width:100%;justify-content:space-between}.seg button{padding:8px 10px;font-size:12px}.chart-content{height:420px;padding:13px 9px 15px}.chart-status{gap:8px;padding:3px 8px}.chart-status strong{font-size:20px}.stamp{margin-left:0;flex-basis:100%}.panel-foot{padding:12px 15px;font-size:11px}.explainer{grid-template-columns:1fr;gap:10px;margin-bottom:30px}.explainer article{padding:16px 18px}.explainer .glyph{margin-bottom:8px}.footer-inner{flex-direction:column;gap:5px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="shell bar-inner"><a href="./" class="brand"><span class="mark">◆</span><span>金价视界<small>GOLD VIEW</small></span></a><nav class="nav"><a href="#markets">行情图表</a><a href="#about">数据说明</a><button class="share" id="shareBtn" type="button">分享网站</button></nav></div></header>
+<main class="shell">
+<div class="intro"><div class="eyebrow">✦ GOLD MARKET OVERVIEW</div><h1>黄金行情，一目了然。</h1><p>国际黄金、国内黄金、品牌金店，三个市场，一站看懂。</p></div>
+<section class="markets" id="markets">
+<button class="market active" data-market="intl" aria-pressed="true" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value">国际金价</div><div class="hint">美元 / 盎司</div></div></button>
+<button class="market" data-market="china" aria-pressed="false" type="button"><div><div class="market-title">上海黄金现货</div><div class="market-code">Au99.99 · 上海黄金交易所</div></div><div class="market-bottom"><div class="value" id="domesticPrice">—</div><div class="hint">人民币 / 克</div></div></button>
+<button class="market" data-market="retail" aria-pressed="false" type="button"><div><div class="market-title">品牌金店黄金</div><div class="market-code">周大福 · 老凤祥 · 周六福</div></div><div class="market-bottom"><div class="value" id="retailPrice">—</div><div class="hint">黄金饰品 / 元每克</div></div></button>
+</section>
+<section class="panel" aria-label="黄金价格走势图"><div class="panel-head"><div class="panel-title"><h2 id="panelTitle">国际现货黄金走势</h2><p id="panelSubtitle">XAU/USD · TradingView 专业图表</p></div><div class="controls">
+<div class="seg hidden" id="rangeControl"><button data-range="day" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" class="selected" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
+<div class="seg hidden" id="typeControl"><button data-type="line" class="selected" type="button">走势</button><button data-type="candle" type="button">K线</button></div>
+<button class="refresh hidden" id="refreshBtn" type="button">刷新</button></div></div>
+<div class="chart-content">
+<div class="tv" id="intlView"><div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>{"autosize":true,"symbol":"OANDA:XAUUSD","interval":"D","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"}</script></div></div>
+<div class="chart-visual hidden" id="dataView"><div class="brand-selector hidden" id="brandSelector"><button data-brand="chowtaifook" class="selected" type="button">周大福</button><button data-brand="laofengxiang" type="button">老凤祥</button><button data-brand="zhouliufu" type="button">周六福</button></div><div class="chart-status"><strong id="currentPrice">—</strong><span id="changeLabel"></span><span class="stamp" id="dataStamp">正在加载官方行情</span></div><div class="graph" id="graph"><div class="empty"><span class="spin"></span>正在读取行情…</div></div></div>
+</div><div class="panel-foot"><span id="disclosure">国际黄金由 TradingView 提供图表；页面由 GitHub Pages 托管。</span><a id="sourceLink" target="_blank" rel="noopener noreferrer" href="https://cn.tradingview.com/symbols/XAUUSD/">查看数据来源</a></div></section>
+<section class="explainer" id="about"><article><div class="glyph">◷</div><h3>轻松查看历史走势</h3><p>支持日线、K线和不同时间范围，查看过去一个月到多年的金价变化。</p></article><article><div class="glyph">≋</div><h3>市场价格清晰区分</h3><p>国际金价按美元/盎司，国内现货和品牌金饰价格按人民币/克展示。</p></article><article><div class="glyph">ⓘ</div><h3>数据来源公开</h3><p>国内行情来自上金所，金店报价为公开参考价；均可能延时，以实际交易或门店报价为准。</p></article></section>
+</main><footer><div class="shell footer-inner"><span>© <span id="year"></span> 金价视界 · 让行情回归简单</span><span>行情仅供参考，不构成投资建议</span></div></footer>
+<script>
+(function(){
+'use strict';
+var market='intl',range='3m',type='line',brand='chowtaifook',hist=[],intraday=[],brands={},quotes={};
+var graph=document.getElementById('graph'),priceNode=document.getElementById('currentPrice');
+var money=new Intl.NumberFormat('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+document.getElementById('year').textContent=new Date().getFullYear();
+document.getElementById('shareBtn').addEventListener('click',async function(){try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);this.textContent='链接已复制';var self=this;setTimeout(function(){self.textContent='分享网站'},1800)}}catch(e){}});
+document.querySelectorAll('[data-market]').forEach(function(b){b.addEventListener('click',function(){setMarket(b.dataset.market)})});
+document.querySelectorAll('[data-range]').forEach(function(b){b.addEventListener('click',function(){range=b.dataset.range;setSelected('[data-range]',b);if(market==='china')loadChina();else draw()})});
+document.querySelectorAll('[data-type]').forEach(function(b){b.addEventListener('click',function(){type=b.dataset.type;setSelected('[data-type]',b);draw()})});
+document.querySelectorAll('[data-brand]').forEach(function(b){b.addEventListener('click',function(){brand=b.dataset.brand;setSelected('[data-brand]',b);loadBrand()})});
+document.getElementById('refreshBtn').addEventListener('click',function(){if(market==='china')loadChina(true);else if(market==='retail')loadBrand(true)});
+function setSelected(selector,b){document.querySelectorAll(selector).forEach(function(x){x.classList.toggle('selected',x===b)})}
+function setMarket(m){
+ market=m;document.querySelectorAll('[data-market]').forEach(function(b){b.classList.toggle('active',b.dataset.market===m);b.setAttribute('aria-pressed',String(b.dataset.market===m))});
+ document.getElementById('intlView').classList.toggle('hidden',m!=='intl');document.getElementById('dataView').classList.toggle('hidden',m==='intl');
+ document.getElementById('rangeControl').classList.toggle('hidden',m!=='china');document.getElementById('typeControl').classList.toggle('hidden',m!=='china'||range==='day');
+ document.getElementById('brandSelector').classList.toggle('hidden',m!=='retail');document.getElementById('refreshBtn').classList.toggle('hidden',m==='intl');
+ var title=m==='intl'?'国际现货黄金走势':m==='china'?'上海黄金 Au99.99 走势':'品牌金店黄金价格走势';
+ var sub=m==='intl'?'XAU/USD · TradingView 专业图表':m==='china'?'Au99.99 · 元/克 · 上海黄金交易所':'黄金饰品挂牌参考价 · 元/克';
+ document.getElementById('panelTitle').textContent=title;document.getElementById('panelSubtitle').textContent=sub;
+ document.getElementById('sourceLink').href=m==='intl'?'https://cn.tradingview.com/symbols/XAUUSD/':m==='china'?'https://www.sge.com.cn/sjzx/mrhq':'https://www.hjjg.net/chowtaifook/history.html';
+ document.getElementById('disclosure').textContent=m==='intl'?'国际黄金由 TradingView 提供图表，价格更新与延时以图表为准。':m==='china'?'上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。':'品牌金店挂牌参考价可能因城市、门店及加工费不同而变化。';
+ if(m==='china')loadChina();else if(m==='retail')loadBrand();
+}
+function fail(){graph.innerHTML='<div class="empty"><strong>暂时无法读取行情</strong><span>数据源暂不可用，请稍后刷新重试。</span><a class="muted-link" target="_blank" rel="noopener noreferrer" href="'+document.getElementById('sourceLink').href+'">打开数据来源查看</a></div>'}
+function spin(){priceNode.textContent='—';document.getElementById('changeLabel').textContent='';document.getElementById('dataStamp').textContent='';graph.innerHTML='<div class="empty"><span class="spin"></span>正在读取行情…</div>'}
+async function getJson(url){
+ var requested=new URL(url,'https://goldview.local'),file;
+ if(requested.pathname==='/api/sge/history')file='./data/sge-history.json';
+ else if(requested.pathname==='/api/sge/intraday')file='./data/sge-intraday.json';
+ else if(requested.pathname==='/api/brand'){
+  var b=requested.searchParams.get('name');
+  if(!['chowtaifook','laofengxiang','zhouliufu'].includes(b))throw Error('unknown brand');
+  file='./data/brand-'+b+'.json';
+ }else throw Error('unknown data source');
+ var r=await fetch(file+'?v='+Date.now(),{cache:'no-store'}),d=await r.json();
+ if(!r.ok||!d.ok)throw Error('source error');return d;
+}
+async function loadChina(force){
+ var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
+ spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china=j.quoteTime||'延时行情'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date}draw()}catch(e){fail()}
+}
+async function loadBrand(force){
+ document.getElementById('sourceLink').href='https://www.hjjg.net/'+brand+'/history.html';
+ if(brands[brand]&&!force){draw();return}spin();
+ try{var j=await getJson('/api/brand?name='+encodeURIComponent(brand)+(force?'&refresh=1':''));brands[brand]=j.points;quotes.retail=j.sourceLabel||'公开挂牌价';draw()}catch(e){fail()}
+}
+function activeSeries(){
+ if(market==='retail')return brands[brand]||[];
+ if(market!=='china')return [];
+ if(range==='day')return intraday;
+ if(!hist.length)return[];
+ if(range==='all')return hist;
+ var n=range==='1m'?31:range==='3m'?93:366,cut=Date.parse(hist[hist.length-1].date+'T00:00:00Z')-n*86400000;
+ return hist.filter(function(p){return Date.parse(p.date+'T00:00:00Z')>=cut});
+}
+function draw(){
+ var series=activeSeries();if(!series.length){fail();return}
+ var latest=series[series.length-1],prev=series.length>1?series[series.length-2].close:latest.close;
+ priceNode.textContent=money.format(latest.close)+' 元/克';
+ var change=latest.close-prev,percent=prev?change/prev*100:0,node=document.getElementById('changeLabel');
+ node.textContent=(change>=0?'+':'')+change.toFixed(2)+' ('+(percent>=0?'+':'')+percent.toFixed(2)+'%)';node.style.color=change>=0?'#dc625d':'#168c70';
+ var stamp=market==='retail'?'最近报价 '+latest.date+' · '+(quotes.retail||'公开报价'):range==='day'?(quotes.china||'盘中延时行情')+' · 延时参考':'历史日线截至 '+latest.date;
+ document.getElementById('dataStamp').textContent=stamp;
+ if(market==='china')document.getElementById('domesticPrice').textContent=money.format(latest.close);
+ else document.getElementById('retailPrice').textContent=money.format(latest.close);
+ var bounds=graph.getBoundingClientRect(),w=Math.max(320,Math.round(bounds.width)),h=Math.max(280,Math.round(bounds.height));
+ var L=13,T=18,R=68,B=38,cw=w-L-R,ch=h-T-B;
+ var lo=Math.min.apply(null,series.map(function(p){return p.low||p.close})),hi=Math.max.apply(null,series.map(function(p){return p.high||p.close}));
+ var gap=(hi-lo)*.13||Math.max(1,hi*.005);lo-=gap;hi+=gap;
+ function X(i){return L+(series.length===1?cw/2:i/(series.length-1)*cw)}
+ function Y(v){return T+(hi-v)/(hi-lo)*ch}
+ var html=['<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="黄金价格走势图"><defs><linearGradient id="goldshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c99b52" stop-opacity=".21"/><stop offset="100%" stop-color="#c99b52" stop-opacity="0"/></linearGradient></defs>'];
+ for(var i=0;i<5;i++){var gy=T+i*ch/4;html.push('<line x1="'+L+'" y1="'+gy+'" x2="'+(w-49)+'" y2="'+gy+'" stroke="#edf1f5" stroke-dasharray="3 5"/><text x="'+(w-43)+'" y="'+(gy+4)+'" fill="#9aa6b3" font-size="12">'+(hi-i*(hi-lo)/4).toFixed(1)+'</text>')}
+ [0,.25,.5,.75,1].forEach(function(v){var ix=Math.round(v*(series.length-1)),label=series[ix].date||series[ix].time||'';if(label.length>=10)label=label.slice(5);html.push('<text x="'+X(ix)+'" y="'+(h-10)+'" text-anchor="middle" fill="#9aa6b3" font-size="12">'+label+'</text>')});
+ var candle=market==='china'&&range!=='day'&&type==='candle';
+ if(candle){var bar=Math.max(1.2,Math.min(11,cw/series.length*.65));series.forEach(function(p,i){var x=X(i),c=p.close>=p.open?'#e25d58':'#16a17b';html.push('<line x1="'+x+'" y1="'+Y(p.high)+'" x2="'+x+'" y2="'+Y(p.low)+'" stroke="'+c+'" stroke-width="1.2"/><rect x="'+(x-bar/2)+'" y="'+Math.min(Y(p.open),Y(p.close))+'" width="'+bar+'" height="'+Math.max(1,Math.abs(Y(p.open)-Y(p.close)))+'" fill="'+c+'"/>')})}
+ else{var path=series.map(function(p,i){return(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.close).toFixed(1)}).join(' ');html.push('<path d="'+path+' L'+X(series.length-1)+' '+(T+ch)+' L'+X(0)+' '+(T+ch)+' Z" fill="url(#goldshade)"/><path d="'+path+'" fill="none" stroke="#bd8940" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>')}
+ html.push('<rect id="plotHover" x="'+L+'" y="'+T+'" width="'+cw+'" height="'+ch+'" fill="transparent"/><line id="plotCross" x1="0" x2="0" y1="'+T+'" y2="'+(T+ch)+'" stroke="#ab8a58" stroke-dasharray="5 5" visibility="hidden"/></svg><div id="plotTip" class="hover-tip hidden"></div>');
+ graph.innerHTML=html.join('');
+ var hover=graph.querySelector('#plotHover'),cross=graph.querySelector('#plotCross'),tip=graph.querySelector('#plotTip');
+ hover.addEventListener('pointermove',function(ev){var pos=graph.getBoundingClientRect(),px=(ev.clientX-pos.left)/pos.width*w,index=Math.round((px-L)/cw*(series.length-1));index=Math.max(0,Math.min(series.length-1,index));var p=series[index],x=X(index),y=Y(p.close);cross.setAttribute('visibility','visible');cross.setAttribute('x1',x);cross.setAttribute('x2',x);tip.classList.remove('hidden');tip.style.left=(x/w*100)+'%';tip.style.top=Math.max(75,y)+'px';tip.innerHTML='<span style="opacity:.7">'+(p.date||p.time||'')+'</span><div><strong>'+money.format(p.close)+' 元/克</strong></div>'+(candle?'<div>开 '+money.format(p.open)+'　高 '+money.format(p.high)+'</div><div>低 '+money.format(p.low)+'　收 '+money.format(p.close)+'</div>':'')});
+ hover.addEventListener('pointerleave',function(){cross.setAttribute('visibility','hidden');tip.classList.add('hidden')});
+}
+var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redraw=setTimeout(function(){if(market!=='intl'&&activeSeries().length)draw()},160)});
+// Preload the official daily close to populate the domestic-market overview.
+getJson('/api/sge/history').then(function(j){hist=j.points;var p=hist[hist.length-1];document.getElementById('domesticPrice').textContent=money.format(p.close)}).catch(function(){});
+})();
+</script>
+</body></html>

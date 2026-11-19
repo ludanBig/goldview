@@ -1,0 +1,128 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+
+const SGE = 'https://www.sge.com.cn';
+const BRANDS = {
+  chowtaifook: { name: '周大福', url: 'https://www.hjjg.net/chowtaifook/history.html' },
+  laofengxiang: { name: '老凤祥', url: 'https://www.hjjg.net/laofengxiang/history.html' },
+  zhouliufu: { name: '周六福', url: 'https://www.hjjg.net/zhouliufu/history.html' }
+};
+
+const num = (value) => {
+  const n = Number(String(value).replace(/,/g, ''));
+  return Number.isFinite(n) && n > 0 && n < 100000 ? n : null;
+};
+
+function dateOf(input) {
+  if (typeof input === 'number' || /^\d{12,}$/.test(String(input))) {
+    const t = Number(input);
+    const d = new Date(t < 1e11 ? t * 1000 : t);
+    return Number.isNaN(d.valueOf()) ? null : d.toISOString().slice(0, 10);
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(input)) ? String(input) : null;
+}
+
+async function fetchText(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: { 'user-agent': 'Mozilla/5.0', accept: '*/*', ...options.headers },
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  return response.text();
+}
+
+async function fetchSge(path, method = 'GET') {
+  const text = await fetchText(SGE + path, {
+    method,
+    headers: {
+      referer: SGE + '/sjzx/mrhq',
+      origin: SGE,
+      accept: 'application/json, text/javascript, */*',
+      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    },
+    ...(method === 'POST' ? { body: 'instid=Au99.99' } : {})
+  });
+  return JSON.parse(text);
+}
+
+export function parseDaily(data) {
+  const rows = Array.isArray(data.time) ? data.time : [];
+  const points = rows.map((row) => {
+    if (!Array.isArray(row) || row.length < 5) return null;
+    const date = dateOf(row[0]);
+    const open = num(row[1]), close = num(row[2]), low = num(row[3]), high = num(row[4]);
+    return date && open && close && low && high && low <= high ? { date, open, close, low, high } : null;
+  }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
+  if (points.length < 5) throw new Error('SGE daily history has too few valid rows');
+  return { ok: true, source: '上海黄金交易所', symbol: 'Au99.99', points };
+}
+
+export function parseIntraday(data) {
+  const times = Array.isArray(data.times) ? data.times : [];
+  const values = Array.isArray(data.data) ? data.data : [];
+  const points = times.map((time, i) => ({ time: String(time), close: num(values[i]) }))
+    .filter((p) => p.close !== null);
+  if (points.length < 5) throw new Error('SGE intraday history has too few valid rows');
+  return { ok: true, source: '上海黄金交易所', quoteTime: String(data.delaystr || ''), points };
+}
+
+export function parseBrand(html, brand) {
+  if (!BRANDS[brand]) throw new Error('Unknown brand');
+  // Site listing order: brand, ornament gold quote, platinum quote, date.
+  const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ');
+  const title = BRANDS[brand].name;
+  const entry = new RegExp(title + '\\s*(\\d{3,4}(?:\\.\\d+)?)\\s*元\\/克\\s*\\d{3,4}(?:\\.\\d+)?\\s*元\\/克\\s*(20\\d{2}-\\d{1,2}-\\d{1,2})', 'g');
+  const points = Array.from(visible.matchAll(entry), (match) => ({
+    date: match[2].replace(/-(\d)(?=-|$)/g, '-0$1'),
+    close: num(match[1])
+  })).filter((p) => p.close && p.close > 100 && p.close < 10000)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const deduped = points.filter((p, i) => p.date !== points[i - 1]?.date);
+  if (deduped.length < 2) throw new Error(title + ' history has too few valid rows');
+  return { ok: true, sourceLabel: '黄金价格网公开资料', brand: title, points: deduped };
+}
+
+async function update(file, producer) {
+  const path = new URL('../public/data/' + file + '.json', import.meta.url);
+  try {
+    const data = await producer();
+    // Don't publish an accidentally truncated quote series.
+    if (data.points.length < 5) throw new Error('Quote series unexpectedly small');
+    const next = JSON.stringify(data) + '\n';
+    const prior = await readFile(path, 'utf8').catch(() => '');
+    if (next !== prior) await writeFile(path, next, 'utf8');
+    console.log(`OK ${file}: ${data.points.length} values`);
+    return true;
+  } catch (error) {
+    console.warn(`KEEP PREVIOUS ${file}: ${error.message}`);
+    return false;
+  }
+}
+
+async function main() {
+  await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
+  const jobs = [
+    ['sge-history', async () => parseDaily(await fetchSge('/graph/Dailyhq', 'POST'))],
+    ['sge-intraday', async () => {
+      let data;
+      try { data = await fetchSge('/graph/quotations?instid=Au99.99'); }
+      catch { data = await fetchSge('/graph/quotations', 'POST'); }
+      return parseIntraday(data);
+    }],
+    ...Object.entries(BRANDS).map(([name, brand]) => [
+      'brand-' + name,
+      async () => parseBrand(await fetchText(brand.url, { headers: { accept: 'text/html' } }), name)
+    ])
+  ];
+  const outcomes = await Promise.all(jobs.map(([file, producer]) => update(file, producer)));
+  console.log(`Data sync: ${outcomes.filter(Boolean).length}/${outcomes.length} sources updated`);
+  // Existing snapshots are intentionally retained on temporary upstream errors.
+}
+
+if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
+  await main();
+}
