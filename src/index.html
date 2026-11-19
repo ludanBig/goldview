@@ -18,24 +18,24 @@
 <main class="shell">
 <div class="intro"><div class="eyebrow">✦ GOLD MARKET OVERVIEW</div><h1>黄金行情，一目了然。</h1><p>国际黄金、国内黄金、品牌金店，三个市场，一站看懂。</p></div>
 <section class="markets" id="markets">
-<button class="market active" data-market="intl" aria-pressed="true" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value">国际金价</div><div class="hint">美元 / 盎司</div></div></button>
-<button class="market" data-market="china" aria-pressed="false" type="button"><div><div class="market-title">上海黄金现货</div><div class="market-code">Au99.99 · 上海黄金交易所</div></div><div class="market-bottom"><div class="value" id="domesticPrice">—</div><div class="hint">人民币 / 克</div></div></button>
+<button class="market" data-market="intl" aria-pressed="false" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value">国际金价</div><div class="hint">美元 / 盎司</div></div></button>
+<button class="market active" data-market="china" aria-pressed="true" type="button"><div><div class="market-title">上海黄金现货</div><div class="market-code">Au99.99 · 上海黄金交易所</div></div><div class="market-bottom"><div class="value" id="domesticPrice">—</div><div class="hint">人民币 / 克</div></div></button>
 <button class="market" data-market="retail" aria-pressed="false" type="button"><div><div class="market-title">品牌金店黄金</div><div class="market-code">周大福 · 老凤祥 · 周六福</div></div><div class="market-bottom"><div class="value" id="retailPrice">—</div><div class="hint">黄金饰品 / 元每克</div></div></button>
 </section>
-<section class="panel" aria-label="黄金价格走势图"><div class="panel-head"><div class="panel-title"><h2 id="panelTitle">国际现货黄金走势</h2><p id="panelSubtitle">XAU/USD · TradingView 专业图表</p></div><div class="controls">
-<div class="seg hidden" id="rangeControl"><button data-range="day" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" class="selected" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
-<div class="seg hidden" id="typeControl"><button data-type="line" class="selected" type="button">走势</button><button data-type="candle" type="button">K线</button></div>
-<button class="refresh hidden" id="refreshBtn" type="button">刷新</button></div></div>
+<section class="panel" aria-label="黄金价格走势图"><div class="panel-head"><div class="panel-title"><h2 id="panelTitle">上海黄金 Au99.99 走势</h2><p id="panelSubtitle">Au99.99 · 元/克 · 上海黄金交易所</p></div><div class="controls">
+<div class="seg" id="rangeControl"><button data-range="day" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" class="selected" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
+<div class="seg" id="typeControl"><button data-type="line" class="selected" type="button">走势</button><button data-type="candle" type="button">K线</button></div>
+<button class="refresh" id="refreshBtn" type="button">刷新</button></div></div>
 <div class="chart-content">
-<div class="tv" id="intlView"><div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>{"autosize":true,"symbol":"OANDA:XAUUSD","interval":"D","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"}</script></div></div>
-<div class="chart-visual hidden" id="dataView"><div class="brand-selector hidden" id="brandSelector"><button data-brand="chowtaifook" class="selected" type="button">周大福</button><button data-brand="laofengxiang" type="button">老凤祥</button><button data-brand="zhouliufu" type="button">周六福</button></div><div class="chart-status"><strong id="currentPrice">—</strong><span id="changeLabel"></span><span class="stamp" id="dataStamp">正在加载官方行情</span></div><div class="graph" id="graph"><div class="empty"><span class="spin"></span>正在读取行情…</div></div></div>
-</div><div class="panel-foot"><span id="disclosure">国际黄金由 TradingView 提供图表；页面由 GitHub Pages 托管。</span><a id="sourceLink" target="_blank" rel="noopener noreferrer" href="https://cn.tradingview.com/symbols/XAUUSD/">查看数据来源</a></div></section>
+<div class="tv hidden" id="intlView"></div>
+<div class="chart-visual" id="dataView"><div class="brand-selector hidden" id="brandSelector"><button data-brand="chowtaifook" class="selected" type="button">周大福</button><button data-brand="laofengxiang" type="button">老凤祥</button><button data-brand="zhouliufu" type="button">周六福</button></div><div class="chart-status"><strong id="currentPrice">—</strong><span id="changeLabel"></span><span class="stamp" id="dataStamp">正在加载官方行情</span></div><div class="graph" id="graph"><div class="empty"><span class="spin"></span>正在读取行情…</div></div></div>
+</div><div class="panel-foot"><span id="disclosure">上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。</span><a id="sourceLink" target="_blank" rel="noopener noreferrer" href="https://www.sge.com.cn/sjzx/mrhq">查看数据来源</a></div></section>
 <section class="explainer" id="about"><article><div class="glyph">◷</div><h3>轻松查看历史走势</h3><p>支持日线、K线和不同时间范围，查看过去一个月到多年的金价变化。</p></article><article><div class="glyph">≋</div><h3>市场价格清晰区分</h3><p>国际金价按美元/盎司，国内现货和品牌金饰价格按人民币/克展示。</p></article><article><div class="glyph">ⓘ</div><h3>数据来源公开</h3><p>国内行情来自上金所，金店报价为公开参考价；均可能延时，以实际交易或门店报价为准。</p></article></section>
 </main><footer><div class="shell footer-inner"><span>© <span id="year"></span> 金价视界 · 让行情回归简单</span><span>行情仅供参考，不构成投资建议</span></div></footer>
 <script>
 (function(){
 'use strict';
-var market='intl',range='3m',type='line',brand='chowtaifook',hist=[],intraday=[],brands={},quotes={};
+var market='china',range='3m',type='line',brand='chowtaifook',hist=[],intraday=[],brands={},quotes={};
 var graph=document.getElementById('graph'),priceNode=document.getElementById('currentPrice');
 var money=new Intl.NumberFormat('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
 document.getElementById('year').textContent=new Date().getFullYear();
@@ -46,9 +46,26 @@ document.querySelectorAll('[data-type]').forEach(function(b){b.addEventListener(
 document.querySelectorAll('[data-brand]').forEach(function(b){b.addEventListener('click',function(){brand=b.dataset.brand;setSelected('[data-brand]',b);loadBrand()})});
 document.getElementById('refreshBtn').addEventListener('click',function(){if(market==='china')loadChina(true);else if(market==='retail')loadBrand(true)});
 function setSelected(selector,b){document.querySelectorAll(selector).forEach(function(x){x.classList.toggle('selected',x===b)})}
+var tradingViewInitialized=false;
+function mountTradingView(){
+ if(tradingViewInitialized||market!=='intl')return;
+ tradingViewInitialized=true;
+ var parent=document.getElementById('intlView');
+ var container=document.createElement('div');
+ container.className='tradingview-widget-container';container.style.cssText='height:100%;width:100%';
+ var widget=document.createElement('div');
+ widget.className='tradingview-widget-container__widget';widget.style.cssText='height:100%;width:100%';
+ container.appendChild(widget);
+ var script=document.createElement('script');
+ script.type='text/javascript';script.async=true;
+ script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+ script.textContent=JSON.stringify({"autosize":true,"symbol":"OANDA:XAUUSD","interval":"D","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"});
+ container.appendChild(script);parent.appendChild(container);
+}
 function setMarket(m){
  market=m;document.querySelectorAll('[data-market]').forEach(function(b){b.classList.toggle('active',b.dataset.market===m);b.setAttribute('aria-pressed',String(b.dataset.market===m))});
  document.getElementById('intlView').classList.toggle('hidden',m!=='intl');document.getElementById('dataView').classList.toggle('hidden',m==='intl');
+ if(m==='intl')requestAnimationFrame(mountTradingView);
  document.getElementById('rangeControl').classList.toggle('hidden',m!=='china');document.getElementById('typeControl').classList.toggle('hidden',m!=='china'||range==='day');
  document.getElementById('brandSelector').classList.toggle('hidden',m!=='retail');document.getElementById('refreshBtn').classList.toggle('hidden',m==='intl');
  var title=m==='intl'?'国际现货黄金走势':m==='china'?'上海黄金 Au99.99 走势':'品牌金店黄金价格走势';
@@ -74,12 +91,13 @@ async function getJson(url){
 }
 async function loadChina(force){
  var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
- spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china=j.quoteTime||'延时行情'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date}draw()}catch(e){fail()}
+ spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china=j.quoteTime||'延时行情'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
 }
 async function loadBrand(force){
- document.getElementById('sourceLink').href='https://www.hjjg.net/'+brand+'/history.html';
- if(brands[brand]&&!force){draw();return}spin();
- try{var j=await getJson('/api/brand?name='+encodeURIComponent(brand)+(force?'&refresh=1':''));brands[brand]=j.points;quotes.retail=j.sourceLabel||'公开挂牌价';draw()}catch(e){fail()}
+ var requestedBrand=brand;
+ document.getElementById('sourceLink').href='https://www.hjjg.net/'+requestedBrand+'/history.html';
+ if(brands[requestedBrand]&&!force){if(market==='retail')draw();return}spin();
+ try{var j=await getJson('/api/brand?name='+encodeURIComponent(requestedBrand)+(force?'&refresh=1':''));brands[requestedBrand]=j.points;quotes.retail=j.sourceLabel||'公开挂牌价';if(brand===requestedBrand){document.getElementById('retailPrice').textContent=money.format(j.points[j.points.length-1].close);if(market==='retail')draw()}}catch(e){if(market==='retail'&&brand===requestedBrand)fail()}
 }
 function activeSeries(){
  if(market==='retail')return brands[brand]||[];
@@ -119,8 +137,16 @@ function draw(){
  hover.addEventListener('pointerleave',function(){cross.setAttribute('visibility','hidden');tip.classList.add('hidden')});
 }
 var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redraw=setTimeout(function(){if(market!=='intl'&&activeSeries().length)draw()},160)});
-// Preload the official daily close to populate the domestic-market overview.
-getJson('/api/sge/history').then(function(j){hist=j.points;var p=hist[hist.length-1];document.getElementById('domesticPrice').textContent=money.format(p.close)}).catch(function(){});
+// Load the default Shanghai market and prefill the retail-market card.
+setMarket('china');
+getJson('/api/brand?name=chowtaifook').then(function(j){
+ if(!j.points.length)return;
+ brands.chowtaifook=j.points;
+ if(brand==='chowtaifook'){
+  document.getElementById('retailPrice').textContent=money.format(j.points[j.points.length-1].close);
+  if(market==='retail')draw();
+ }
+}).catch(function(){});
 })();
 </script>
 </body></html>
