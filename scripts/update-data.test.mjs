@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDaily, parseIntraday, parseBrand } from './update-data.mjs';
+import { parseDaily, parseIntraday, parseBrand, parseXauPrice } from './update-data.mjs';
 
 test('SGE daily OHLC parsing and date sort', () => {
   const time = Array.from({ length: 5 }, (_, i) => [`2026-11-${String(5 - i).padStart(2, '0')}`, 810, 812 + i, 800, 821]);
@@ -23,4 +23,18 @@ test('Brand price parser chooses ornament rather than platinum quote', () => {
   const data = parseBrand(html, 'chowtaifook');
   assert.equal(data.points.length, 5);
   assert.deepEqual(data.points.at(-1), { date: '2026-11-18', close: 1151 });
+});
+
+test('XAU price parser accepts a current USD per ounce quote', () => {
+  const updatedAt = new Date(Date.now() - 60_000).toISOString();
+  const quote = parseXauPrice({ symbol: 'XAU', currency: 'USD', price: 3742.15, updatedAt });
+  assert.deepEqual(quote, { ok: true, source: 'Gold API', symbol: 'XAU',
+    currency: 'USD', price: 3742.15, updatedAt });
+});
+
+test('XAU price parser rejects mismatched or stale data', () => {
+  const updatedAt = new Date().toISOString();
+  assert.throws(() => parseXauPrice({ symbol: 'XAG', currency: 'USD', price: 3742.15, updatedAt }));
+  assert.throws(() => parseXauPrice({ symbol: 'XAU', currency: 'USD', price: -1, updatedAt }));
+  assert.throws(() => parseXauPrice({ symbol: 'XAU', currency: 'USD', price: 3742.15, updatedAt: '2020-01-01T00:00:00Z' }));
 });

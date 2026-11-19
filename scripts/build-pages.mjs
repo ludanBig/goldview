@@ -7,7 +7,7 @@ const publicDir = new URL('../public/', import.meta.url);
 await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
 await writeFile(new URL('../public/index.html', import.meta.url), html, 'utf8');
 await writeFile(new URL('../public/.nojekyll', import.meta.url), '', 'utf8');
-const files = ['sge-history', 'sge-intraday', 'brand-chowtaifook', 'brand-laofengxiang', 'brand-zhouliufu'];
+const files = ['xau-latest', 'sge-history', 'sge-intraday', 'brand-chowtaifook', 'brand-laofengxiang', 'brand-zhouliufu'];
 for (const file of files) {
   const path = new URL('../public/data/' + file + '.json', import.meta.url);
   try { await access(path); }

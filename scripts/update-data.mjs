@@ -86,16 +86,28 @@ export function parseBrand(html, brand) {
   return { ok: true, sourceLabel: '黄金价格网公开资料', brand: title, points: deduped };
 }
 
-async function update(file, producer) {
+export function parseXauPrice(data) {
+  const price = num(data?.price);
+  const updated = Date.parse(data?.updatedAt);
+  const age = Date.now() - updated;
+  if (data?.symbol !== 'XAU' || data?.currency !== 'USD' || price === null ||
+      !Number.isFinite(updated) || age < -5 * 60 * 1000 || age > 7 * 86400000) {
+    throw new Error('Invalid or outdated XAU/USD quote');
+  }
+  return { ok: true, source: 'Gold API', symbol: 'XAU', currency: 'USD',
+    price, updatedAt: new Date(updated).toISOString() };
+}
+
+async function update(file, producer, hasSeries = true) {
   const path = new URL('../public/data/' + file + '.json', import.meta.url);
   try {
     const data = await producer();
     // Don't publish an accidentally truncated quote series.
-    if (data.points.length < 5) throw new Error('Quote series unexpectedly small');
+    if (hasSeries && (!Array.isArray(data.points) || data.points.length < 5)) throw new Error('Quote series unexpectedly small');
     const next = JSON.stringify(data) + '\n';
     const prior = await readFile(path, 'utf8').catch(() => '');
     if (next !== prior) await writeFile(path, next, 'utf8');
-    console.log(`OK ${file}: ${data.points.length} values`);
+    console.log(`OK ${file}: ${hasSeries ? data.points.length + ' values' : 'fresh quote'}`);
     return true;
   } catch (error) {
     console.warn(`KEEP PREVIOUS ${file}: ${error.message}`);
@@ -106,6 +118,7 @@ async function update(file, producer) {
 async function main() {
   await mkdir(new URL('../public/data/', import.meta.url), { recursive: true });
   const jobs = [
+    ['xau-latest', async () => parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU', { headers: { accept: 'application/json' } }))), false],
     ['sge-history', async () => parseDaily(await fetchSge('/graph/Dailyhq', 'POST'))],
     ['sge-intraday', async () => {
       let data;
@@ -118,7 +131,7 @@ async function main() {
       async () => parseBrand(await fetchText(brand.url, { headers: { accept: 'text/html' } }), name)
     ])
   ];
-  const outcomes = await Promise.all(jobs.map(([file, producer]) => update(file, producer)));
+  const outcomes = await Promise.all(jobs.map(([file, producer, hasSeries]) => update(file, producer, hasSeries)));
   console.log(`Data sync: ${outcomes.filter(Boolean).length}/${outcomes.length} sources updated`);
   // Existing snapshots are intentionally retained on temporary upstream errors.
 }

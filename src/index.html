@@ -18,7 +18,7 @@
 <main class="shell">
 <div class="intro"><div class="eyebrow">✦ GOLD MARKET OVERVIEW</div><h1>黄金行情，一目了然。</h1><p>国际黄金、国内黄金、品牌金店，三个市场，一站看懂。</p></div>
 <section class="markets" id="markets">
-<button class="market" data-market="intl" aria-pressed="false" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value">国际金价</div><div class="hint">美元 / 盎司</div></div></button>
+<button class="market" data-market="intl" aria-pressed="false" type="button"><div><div class="market-title">国际现货黄金</div><div class="market-code">XAU/USD · 全球市场</div></div><div class="market-bottom"><div class="value" id="intlPrice">—</div><div class="hint">美元 / 盎司</div></div></button>
 <button class="market active" data-market="china" aria-pressed="true" type="button"><div><div class="market-title">上海黄金现货</div><div class="market-code">Au99.99 · 上海黄金交易所</div></div><div class="market-bottom"><div class="value" id="domesticPrice">—</div><div class="hint">人民币 / 克</div></div></button>
 <button class="market" data-market="retail" aria-pressed="false" type="button"><div><div class="market-title">品牌金店黄金</div><div class="market-code">周大福 · 老凤祥 · 周六福</div></div><div class="market-bottom"><div class="value" id="retailPrice">—</div><div class="hint">黄金饰品 / 元每克</div></div></button>
 </section>
@@ -72,14 +72,15 @@ function setMarket(m){
  var sub=m==='intl'?'XAU/USD · TradingView 专业图表':m==='china'?'Au99.99 · 元/克 · 上海黄金交易所':'黄金饰品挂牌参考价 · 元/克';
  document.getElementById('panelTitle').textContent=title;document.getElementById('panelSubtitle').textContent=sub;
  document.getElementById('sourceLink').href=m==='intl'?'https://cn.tradingview.com/symbols/XAUUSD/':m==='china'?'https://www.sge.com.cn/sjzx/mrhq':'https://www.hjjg.net/chowtaifook/history.html';
- document.getElementById('disclosure').textContent=m==='intl'?'国际黄金由 TradingView 提供图表，价格更新与延时以图表为准。':m==='china'?'上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。':'品牌金店挂牌参考价可能因城市、门店及加工费不同而变化。';
+ document.getElementById('disclosure').textContent=m==='intl'?'国际金价卡片采用 Gold API 参考报价，走势由 TradingView 提供；两个来源可能存在差异或延时。':m==='china'?'上海黄金交易所 Au99.99 公开行情；分时及日线更新频率不同。':'品牌金店挂牌参考价可能因城市、门店及加工费不同而变化。';
  if(m==='china')loadChina();else if(m==='retail')loadBrand();
 }
 function fail(){graph.innerHTML='<div class="empty"><strong>暂时无法读取行情</strong><span>数据源暂不可用，请稍后刷新重试。</span><a class="muted-link" target="_blank" rel="noopener noreferrer" href="'+document.getElementById('sourceLink').href+'">打开数据来源查看</a></div>'}
 function spin(){priceNode.textContent='—';document.getElementById('changeLabel').textContent='';document.getElementById('dataStamp').textContent='';graph.innerHTML='<div class="empty"><span class="spin"></span>正在读取行情…</div>'}
 async function getJson(url){
  var requested=new URL(url,'https://goldview.local'),file;
- if(requested.pathname==='/api/sge/history')file='./data/sge-history.json';
+ if(requested.pathname==='/api/xau/price')file='./data/xau-latest.json';
+ else if(requested.pathname==='/api/sge/history')file='./data/sge-history.json';
  else if(requested.pathname==='/api/sge/intraday')file='./data/sge-intraday.json';
  else if(requested.pathname==='/api/brand'){
   var b=requested.searchParams.get('name');
@@ -88,6 +89,23 @@ async function getJson(url){
  }else throw Error('unknown data source');
  var r=await fetch(file+'?v='+Date.now(),{cache:'no-store'}),d=await r.json();
  if(!r.ok||!d.ok)throw Error('source error');return d;
+}
+var intlQuoteTimestamp=0;
+function showIntlPrice(quote){
+ var price=Number(quote&&quote.price),time=Date.parse(quote&&quote.updatedAt);
+ if(!quote||quote.symbol!=='XAU'||quote.currency!=='USD'||
+    !Number.isFinite(price)||price<=0||price>=100000||!Number.isFinite(time)||
+    time<Date.now()-7*86400000||time>Date.now()+5*60000||time<intlQuoteTimestamp)return;
+ intlQuoteTimestamp=time;
+ var node=document.getElementById('intlPrice');
+ node.textContent=money.format(price);
+ node.title='Gold API 参考报价 · '+new Date(time).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})+'（北京时间）';
+}
+function loadIntlPrice(){
+ getJson('/api/xau/price').then(showIntlPrice).catch(function(){});
+ fetch('https://api.gold-api.com/price/XAU',{cache:'no-store'})
+  .then(function(response){if(!response.ok)throw Error('XAU feed unavailable');return response.json()})
+  .then(showIntlPrice).catch(function(){});
 }
 async function loadChina(force){
  var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
@@ -139,6 +157,7 @@ function draw(){
 var redraw;window.addEventListener('resize',function(){clearTimeout(redraw);redraw=setTimeout(function(){if(market!=='intl'&&activeSeries().length)draw()},160)});
 // Load the default Shanghai market and prefill the retail-market card.
 setMarket('china');
+loadIntlPrice();
 getJson('/api/brand?name=chowtaifook').then(function(j){
  if(!j.points.length)return;
  brands.chowtaifook=j.points;
