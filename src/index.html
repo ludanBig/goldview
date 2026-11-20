@@ -31,7 +31,7 @@
 </section>
 <section class="panel" aria-label="黄金价格走势图"><div class="panel-head"><div class="panel-title"><h2 id="panelTitle">上海黄金 Au99.99 走势</h2><p id="panelSubtitle">Au99.99 · 元/克 · 上海黄金交易所</p></div><div class="controls">
 <div class="seg hidden" id="intlModeControl"><button data-intl-mode="simple" class="selected" type="button">简洁图表</button><button data-intl-mode="tv" type="button">专业图表</button></div>
-<div class="seg" id="rangeControl"><button data-range="day" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" class="selected" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
+<div class="seg" id="rangeControl"><button data-range="day" class="selected" type="button">分时</button><button data-range="1m" type="button">1月</button><button data-range="3m" type="button">3月</button><button data-range="1y" type="button">1年</button><button data-range="all" type="button">全部</button></div>
 <div class="seg" id="typeControl"><button data-type="line" class="selected" type="button">走势</button><button data-type="candle" type="button">K线</button></div>
 <button class="refresh" id="refreshBtn" type="button">刷新</button></div></div>
 <div class="chart-content">
@@ -43,7 +43,7 @@
 <script>
 (function(){
 'use strict';
-var market='china',range='3m',type='line',brand='chowtaifook',intlMode='simple',hist=[],intraday=[],intlHist=[],intlIntraday=[],brands={},quotes={};
+var market='china',range='day',type='line',brand='chowtaifook',intlMode='simple',hist=[],intraday=[],intlHist=[],intlIntraday=[],brands={},quotes={};
 var graph=document.getElementById('graph'),priceNode=document.getElementById('currentPrice');
 var money=new Intl.NumberFormat('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
 document.getElementById('year').textContent=new Date().getFullYear();
@@ -73,7 +73,7 @@ function mountTradingView(){
  var script=document.createElement('script');
  script.type='text/javascript';script.async=true;
  script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
- script.textContent=JSON.stringify({"autosize":true,"symbol":"OANDA:XAUUSD","interval":"D","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"});
+ script.textContent=JSON.stringify({"autosize":true,"symbol":"OANDA:XAUUSD","interval":"1","timezone":"Asia/Shanghai","theme":"light","style":"1","locale":"zh_CN","backgroundColor":"#ffffff","gridColor":"rgba(226,232,240,0.45)","hide_top_toolbar":false,"hide_legend":false,"hide_side_toolbar":true,"allow_symbol_change":false,"save_image":false,"calendar":false,"support_host":"https://www.tradingview.com"});
  script.onerror=function(){tradingViewInitialized=false;parent.textContent='';if(market==='intl'&&intlMode==='tv')setIntlMode('simple')};
  container.appendChild(script);parent.appendChild(container);
 }
