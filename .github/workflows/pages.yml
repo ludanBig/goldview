@@ -1,23 +1,18 @@
-name: Update gold prices and deploy Pages
+name: Deploy goldview to Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    # UTC: hourly refresh, with a backup check 30 minutes later.
-    # The updater skips the backup when a full sync finished recently.
-    - cron: '17 * * * *'
-    - cron: '47 * * * *'
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
   group: goldview-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -32,21 +27,8 @@ jobs:
           node-version: '22'
       - name: Build static site
         run: npm run build
-      - name: Test data parsers
+      - name: Test data parsers and scheduler
         run: node --test
-      - name: Refresh published gold price snapshots
-        run: npm run update-data -- --if-due
-        env:
-          UPDATE_SCHEDULED: ${{ github.event_name == 'schedule' }}
-      - name: Save fresh data to repository
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: update gold market snapshots [skip ci]"
-            git push
-          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

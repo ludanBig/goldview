@@ -116,12 +116,12 @@ async function getJson(url){
 }
 var syncLastRun=null,syncInfo=null;
 function showSyncStatus(info){
- var node=document.getElementById('syncStatus'),last=Date.parse(info.sources&&info.sources['xau-latest']);
+ var node=document.getElementById('syncStatus'),last=Date.parse(info.lastRunAt);
  var valid=Number.isFinite(last),late=!valid||Date.now()-last>=2*60*60*1000;
  var incomplete=info.successful<info.total;
  var dateLabel=valid?new Date(last).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'未知';
  node.className='sync-status'+(late||incomplete?' late':'');
- node.textContent=(late?'数据更新延迟':'行情已同步')+' · 国际金价缓存更新于 '+dateLabel+'（北京时间）'+(incomplete?' · 部分数据源抓取失败 '+info.successful+'/'+info.total:'');
+ node.textContent=(late?'数据抓取延迟':'最近抓取成功')+' · 上次运行 '+dateLabel+'（北京时间）'+(incomplete?' · 部分数据源抓取失败 '+info.successful+'/'+info.total:'')+' · 行情报价时间见下方';
 }
 async function refreshSyncStatus(){
  try{
@@ -179,7 +179,7 @@ async function loadIntl(force){
 }
 async function loadChina(force){
  var key=range==='day'?'intraday':'history',data=range==='day'?intraday:hist;if(data.length&&!force){draw();return}
- spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china='分时截至 '+intraday[intraday.length-1].time+'（北京时间）'}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
+ spin();try{var j=await getJson('/api/sge/'+key+(force?'?refresh=1':''));if(key==='intraday'){intraday=j.points;quotes.china='上金所行情截至 '+(j.quoteTime||intraday[intraday.length-1].time)}else{hist=j.points;quotes.china='历史日线截至 '+hist[hist.length-1].date;document.getElementById('domesticPrice').textContent=money.format(hist[hist.length-1].close)}if(market==='china')draw()}catch(e){if(market==='china')fail()}
 }
 async function loadBrand(force){
  var requestedBrand=brand;

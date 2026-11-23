@@ -1,0 +1,57 @@
+name: Refresh gold price snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Sync even when the latest successful update is recent'
+        type: boolean
+        required: false
+        default: false
+  schedule:
+    # GitHub backup scheduler, UTC; external Cloudflare Cron can run at :07.
+    - cron: '17 * * * *'
+    - cron: '47 * * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: goldview-data-sync
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test data parsers and scheduler
+        run: node --test
+      - name: Fetch and validate gold market data
+        run: npm run update-data -- --if-due
+        env:
+          UPDATE_SCHEDULED: ${{ github.event_name == 'schedule' || !inputs.force }}
+      - name: Commit successful snapshots
+        id: commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No new snapshots; deployment unnecessary"
+            exit 0
+          fi
+          git commit -m "chore: refresh gold market snapshots [skip ci]"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Deploy changed snapshots
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main
