@@ -11,20 +11,20 @@ on:
     - cron: '47 * * * *'
 
 permissions:
+  actions: read
   contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: goldview-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      sync_at: ${{ steps.snapshot.outputs.sync_at }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,10 +47,50 @@ jobs:
             git commit -m "chore: update gold market snapshots [skip ci]"
             git push
           fi
+      - name: Record expected sync timestamp
+        id: snapshot
+        run: |
+          sync_at=$(node -p "require('./public/data/sync-status.json').lastRunAt")
+          echo "sync_at=$sync_at" >> "$GITHUB_OUTPUT"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
           path: ./public
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for the Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in {1..8}; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" \
+                --jq '.artifacts[] | select(.name == "github-pages" and .expired == false) | .id' | grep -q .; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Pages artifact not visible for this run"
+          exit 1
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the public sync timestamp
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SYNC: ${{ needs.build.outputs.sync_at }}
+        run: |
+          test -n "$PAGE_URL" && test -n "$EXPECTED_SYNC" || exit 1
+          for attempt in {1..12}; do
+            if curl -fsS --max-time 10 "${PAGE_URL%/}/data/sync-status.json?run=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$attempt" |
+                jq -e --arg expected "$EXPECTED_SYNC" '.lastRunAt == $expected' >/dev/null; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Public sync status does not match the deployed snapshot"
+          exit 1
