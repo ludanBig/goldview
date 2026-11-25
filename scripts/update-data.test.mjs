@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXauHistory, parseXausHistory, parseXausIntraday, isRecentFullSync, buildSyncStatus } from './update-data.mjs';
+import { parseDaily, parseIntraday, parseBrand, parseXauPrice, parseXausSpot, parseXauHistory, parseXausHistory, parseXausIntraday, isRecentFullSync, buildSyncStatus } from './update-data.mjs';
 
 test('hourly sync keeps a backup window and retries old or partial syncs', () => {
   const now = Date.parse('2026-11-19T11:47:00Z');
@@ -129,4 +129,20 @@ test('XAUS intraday conversion uses Shanghai time and latest calendar day', () =
   assert.equal(parsed.points.length, 8);
   assert.equal(parsed.points[0].date, '2026-11-19');
   assert.equal(parsed.points[0].time, '09:00');
+});
+
+test('XAUS spot fallback uses a fresh USD/troy-ounce price and the source timestamp', () => {
+  const as_of = '2026-11-25T01:00:00.000Z';
+  const now = Date.parse('2026-11-25T01:02:00.000Z');
+  const payload = { xau: { price: 4021.25, currency: 'USD', unit: 'troy_oz' },
+    updated_at: '2026-11-25T01:01:00.000Z', data_state: { status: 'fresh', as_of } };
+  const quote = parseXausSpot(payload, now);
+  assert.equal(quote.price, 4021.25);
+  assert.equal(quote.updatedAt, as_of);
+  assert.match(quote.source, /^XAUS/);
+  assert.throws(() => parseXausSpot({ ...payload, stale: true }, now));
+  assert.throws(() => parseXausSpot({ ...payload, data_state: { status: 'stale', as_of } }, now));
+  assert.throws(() => parseXausSpot({ ...payload, xau: { ...payload.xau, unit: 'gram' } }, now));
+  assert.throws(() => parseXausSpot(payload, now + 15 * 60000));
+  assert.throws(() => parseXausSpot({ ...payload, data_state: { status: 'fresh' } }, now));
 });

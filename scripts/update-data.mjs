@@ -122,6 +122,18 @@ export function parseXauPrice(data) {
 }
 
 
+export function parseXausSpot(data, now = Date.now()) {
+  const price = num(data?.xau?.price);
+  const updated = Date.parse(data?.data_state?.as_of);
+  if (data?.xau?.currency !== 'USD' || data?.xau?.unit !== 'troy_oz' ||
+      data?.data_state?.status !== 'fresh' || data?.stale === true || price === null ||
+      !Number.isFinite(updated) || updated > now + 5 * 60000 || now - updated > 15 * 60000) {
+    throw new Error('Invalid or stale XAUS XAU/USD spot quote');
+  }
+  return { ok: true, source: 'XAUS XAU/USD 参考行情', symbol: 'XAU', currency: 'USD',
+    price, updatedAt: new Date(updated).toISOString() };
+}
+
 const EASTMONEY_XAU = 'https://push2his.eastmoney.com/api/qt/stock/kline/get';
 
 async function fetchEastmoneyXau(interval, limit) {
@@ -270,7 +282,15 @@ async function main() {
     return;
   }
   const jobs = [
-    ['xau-latest', async () => parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU', { headers: { accept: 'application/json' } }))), false],
+    ['xau-latest', async () => {
+      try {
+        return parseXauPrice(JSON.parse(await fetchText('https://api.gold-api.com/price/XAU',
+          { headers: { accept: 'application/json' } })));
+      } catch (error) {
+        console.warn('Gold API unavailable; checking XAUS spot:', error.message);
+        return parseXausSpot(await fetchXaus('spot?currency=USD&unit=oz&compact=1'));
+      }
+    }, false],
     ['xau-history', async () => {
       try { return parseXausHistory(await fetchXaus('history')); }
       catch { return parseXauHistory(await fetchEastmoneyXau(101, 500)); }
