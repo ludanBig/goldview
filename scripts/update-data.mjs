@@ -236,6 +236,11 @@ async function update(file, producer, hasSeries = true) {
     if (hasSeries && (!Array.isArray(data.points) || data.points.length < 5)) throw new Error('Quote series unexpectedly small');
     const next = JSON.stringify(data) + '\n';
     const prior = await readFile(path, 'utf8').catch(() => '');
+    if (file === 'xau-latest' && prior) {
+      let previousTime;
+      try { previousTime = Date.parse(JSON.parse(prior).updatedAt); } catch {}
+      if (Date.parse(data.updatedAt) < previousTime) throw new Error('Quote predates cached snapshot');
+    }
     if (next !== prior) await writeFile(path, next, 'utf8');
     console.log(`OK ${file}: ${hasSeries ? data.points.length + ' values' : 'fresh quote'}`);
     return true;

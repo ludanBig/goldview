@@ -147,7 +147,7 @@ function showIntlPrice(quote){
  intlQuoteTimestamp=time;
  var node=document.getElementById('intlPrice');
  node.textContent=money.format(price);
- node.title='Gold API 参考报价 · '+new Date(time).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})+'（北京时间）';
+ node.title=(quote.source==='XAUS XAU/USD 参考行情'?quote.source:'Gold API 参考报价')+' · '+new Date(time).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})+'（北京时间）';
 }
 function loadIntlPrice(){
  getJson('/api/xau/price').then(showIntlPrice).catch(function(){});
