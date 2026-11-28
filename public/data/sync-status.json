@@ -1,17 +1,17 @@
 {
   "ok": true,
-  "lastRunAt": "2026-11-27T22:59:59.920Z",
-  "lastFullSyncAt": "2026-11-27T22:59:59.920Z",
+  "lastRunAt": "2026-11-28T01:58:42.564Z",
+  "lastFullSyncAt": "2026-11-28T01:58:42.564Z",
   "successful": 8,
   "total": 8,
   "sources": {
-    "xau-latest": "2026-11-27T22:59:59.920Z",
-    "xau-history": "2026-11-27T22:59:59.920Z",
-    "xau-intraday": "2026-11-27T22:59:59.920Z",
-    "sge-history": "2026-11-27T22:59:59.920Z",
-    "sge-intraday": "2026-11-27T22:59:59.920Z",
-    "brand-chowtaifook": "2026-11-27T22:59:59.920Z",
-    "brand-laofengxiang": "2026-11-27T22:59:59.920Z",
-    "brand-zhouliufu": "2026-11-27T22:59:59.920Z"
+    "xau-latest": "2026-11-28T01:58:42.564Z",
+    "xau-history": "2026-11-28T01:58:42.564Z",
+    "xau-intraday": "2026-11-28T01:58:42.564Z",
+    "sge-history": "2026-11-28T01:58:42.564Z",
+    "sge-intraday": "2026-11-28T01:58:42.564Z",
+    "brand-chowtaifook": "2026-11-28T01:58:42.564Z",
+    "brand-laofengxiang": "2026-11-28T01:58:42.564Z",
+    "brand-zhouliufu": "2026-11-28T01:58:42.564Z"
   }
 }
